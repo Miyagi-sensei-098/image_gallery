@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>画像一覧</title>
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  .accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: 0.4s;
+    margin-top: 5px;
+  }
+
+  .active, .accordion:hover {
+    background-color: #ffffe0;
+  }
+
+  .panel {
+    padding: 0 18px;
+    display: none;
+    background-color: white;
+    overflow: hidden;
+  }
+  .image-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  .image-row img {
+    flex: 0 0 20%;
+    width: 20%;
+    height: auto;
+    object-fit: cover;
+    padding: 2px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .image-row img:hover {
+    transform: scale(1.05);
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-content {
+    display: block;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 80px); /* Adjusted for caption */
+    width: auto;
+    height: auto;
+  }
+  #caption {
+    margin-top: 15px;
+    color: #ccc;
+    font-size: 18px;
+    text-align: center;
+  }
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<button class="accordion">01_緑ラベル</button>
+<div class="panel">
+  <div class="image-row">
+    <img src="01_緑ラベル/10000185_01.webp" alt="10000185_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000185_02.webp" alt="10000185_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000185_03.webp" alt="10000185_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000185_04.webp" alt="10000185_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000185_05.webp" alt="10000185_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/10000185_06.webp" alt="10000185_06.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/10000735_01.webp" alt="10000735_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_02.webp" alt="10000735_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_03.webp" alt="10000735_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_04.webp" alt="10000735_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_05.webp" alt="10000735_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/10000735_06.webp" alt="10000735_06.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_1_1.webp" alt="10000735_1_1.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_1_2.webp" alt="10000735_1_2.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000735_12_1.webp" alt="10000735_12_1.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/10000749_01.webp" alt="10000749_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_02.webp" alt="10000749_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_03.webp" alt="10000749_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_04.webp" alt="10000749_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_05.webp" alt="10000749_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/10000749_06.webp" alt="10000749_06.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_A-09002.webp" alt="10000749_A-09002.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_B-09004.webp" alt="10000749_B-09004.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_C-09002.webp" alt="10000749_C-09002.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_D-09001.webp" alt="10000749_D-09001.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/10000749_E-09001.webp" alt="10000749_E-09001.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_F-09001.webp" alt="10000749_F-09001.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/10000749_G-09001.webp" alt="10000749_G-09001.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09003_01.webp" alt="A-09003_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09003_02.webp" alt="A-09003_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09003_03.webp" alt="A-09003_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09003_04.webp" alt="A-09003_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09003_05.webp" alt="A-09003_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09003_A-09003.webp" alt="A-09003_A-09003.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09003_B-09006.webp" alt="A-09003_B-09006.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09003_G-09025.webp" alt="A-09003_G-09025.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09005_01.webp" alt="A-09005_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09005_02.webp" alt="A-09005_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09005_03.webp" alt="A-09005_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09005_04.webp" alt="A-09005_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09005_05.webp" alt="A-09005_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09005_A-09005.webp" alt="A-09005_A-09005.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09005_B-09013.webp" alt="A-09005_B-09013.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09005_G-09006.webp" alt="A-09005_G-09006.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09018_01.webp" alt="A-09018_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09018_02.webp" alt="A-09018_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09018_03.webp" alt="A-09018_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09018_04.webp" alt="A-09018_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09018_05.webp" alt="A-09018_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09018_A-09018.webp" alt="A-09018_A-09018.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09018_B-09030.webp" alt="A-09018_B-09030.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09018_G-09002.webp" alt="A-09018_G-09002.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09021_01.webp" alt="A-09021_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09021_02.webp" alt="A-09021_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09021_03.webp" alt="A-09021_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09021_04.webp" alt="A-09021_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09021_05.webp" alt="A-09021_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09021_A-09021.webp" alt="A-09021_A-09021.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09021_G-09005.webp" alt="A-09021_G-09005.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09049_01.webp" alt="A-09049_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_02.webp" alt="A-09049_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_03.webp" alt="A-09049_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_04.webp" alt="A-09049_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_05.webp" alt="A-09049_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09049_A-09049.webp" alt="A-09049_A-09049.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_B-09041.webp" alt="A-09049_B-09041.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_C-09017.webp" alt="A-09049_C-09017.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_D-09016.webp" alt="A-09049_D-09016.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_E-09003.webp" alt="A-09049_E-09003.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09049_F-09005.webp" alt="A-09049_F-09005.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09049_G-09004.webp" alt="A-09049_G-09004.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09097_01.webp" alt="A-09097_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09097_02.webp" alt="A-09097_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09097_03.webp" alt="A-09097_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09097_04.webp" alt="A-09097_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09097_05.webp" alt="A-09097_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09097_A-09097.webp" alt="A-09097_A-09097.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09097_B-09072.webp" alt="A-09097_B-09072.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09097_G-09008.webp" alt="A-09097_G-09008.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09153_01.webp" alt="A-09153_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09153_02.webp" alt="A-09153_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09153_03.webp" alt="A-09153_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09153_04.webp" alt="A-09153_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-09153_05.webp" alt="A-09153_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-09153_A-09153.webp" alt="A-09153_A-09153.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10006_01.webp" alt="A-10006_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10006_02.webp" alt="A-10006_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10006_03.webp" alt="A-10006_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10006_04.webp" alt="A-10006_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10006_05.webp" alt="A-10006_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10006_A-10006.webp" alt="A-10006_A-10006.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10006_B-10008.webp" alt="A-10006_B-10008.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10019_01.webp" alt="A-10019_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10019_02.webp" alt="A-10019_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10019_03.webp" alt="A-10019_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10019_04.webp" alt="A-10019_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10019_05.webp" alt="A-10019_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10019_A-10019.webp" alt="A-10019_A-10019.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10019_B-10010.webp" alt="A-10019_B-10010.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10045_01.webp" alt="A-10045_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10045_02.webp" alt="A-10045_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10045_03.webp" alt="A-10045_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10045_04.webp" alt="A-10045_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10045_05.webp" alt="A-10045_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10045_A-10045.webp" alt="A-10045_A-10045.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10074_01.webp" alt="A-10074_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10074_02.webp" alt="A-10074_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10074_03.webp" alt="A-10074_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10074_04.webp" alt="A-10074_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/A-10074_05.webp" alt="A-10074_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/A-10074_A-10074.webp" alt="A-10074_A-10074.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/G-09037_01.webp" alt="G-09037_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/G-09037_02.webp" alt="G-09037_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/G-09037_03.webp" alt="G-09037_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/G-09037_04.webp" alt="G-09037_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/G-09037_05.webp" alt="G-09037_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/G-09037_G-09037.webp" alt="G-09037_G-09037.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/h-79001_01.webp" alt="h-79001_01.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/h-79001_02.webp" alt="h-79001_02.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/h-79001_03.webp" alt="h-79001_03.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/h-79001_04.webp" alt="h-79001_04.webp" onclick="openModal(this)">
+    <img src="01_緑ラベル/h-79001_05.webp" alt="h-79001_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="01_緑ラベル/h-79001_H-79001.webp" alt="h-79001_H-79001.webp" onclick="openModal(this)">
+  </div>
+</div>
+
+<div id="myModal" class="modal">
+  <span class="close" onclick="closeModal()">&times;</span>
+  <div class="modal-container">
+    <img class="modal-content" id="modalImage">
+    <div id="caption"></div>
+  </div>
+</div>
+
+<script>
+  function initializeAccordions() {
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+        }
+      });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    initializeAccordions();
+  });
+
+  var modal = document.getElementById('myModal');
+  var modalImg = document.getElementById("modalImage");
+  var captionText = document.getElementById("caption");
+
+  function openModal(elem) {
+    modal.style.display = "flex";
+    modalImg.src = elem.src;
+    captionText.innerHTML = elem.alt;
+  }
+
+  function closeModal() {
+    modal.style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      closeModal();
+    }
+  }
+</script>
+
+<button class="accordion">02_毛ガニ</button>
+<div class="panel">
+  <div class="image-row">
+    <img src="02_毛ガニ/10000561_01.webp" alt="10000561_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10000561_02.webp" alt="10000561_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10000561_03.webp" alt="10000561_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10000561_04.webp" alt="10000561_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10000561_05.webp" alt="10000561_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10002503_01.webp" alt="10002503_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002503_02.webp" alt="10002503_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002503_03.webp" alt="10002503_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002503_04.webp" alt="10002503_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002503_05.webp" alt="10002503_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10002655_01.webp" alt="10002655_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002655_02.webp" alt="10002655_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002655_03.webp" alt="10002655_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002655_04.webp" alt="10002655_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002655_05.webp" alt="10002655_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10002699_01.webp" alt="10002699_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002699_02.webp" alt="10002699_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002699_03.webp" alt="10002699_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002699_04.webp" alt="10002699_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10002699_05.webp" alt="10002699_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10003228_01.webp" alt="10003228_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10003228_02.webp" alt="10003228_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10003228_03.webp" alt="10003228_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10003228_04.webp" alt="10003228_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10003228_05.webp" alt="10003228_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10004460_01.webp" alt="10004460_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004460_02.webp" alt="10004460_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004460_03.webp" alt="10004460_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004460_04.webp" alt="10004460_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004460_05.webp" alt="10004460_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10004753_01.webp" alt="10004753_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004753_02.webp" alt="10004753_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004753_03.webp" alt="10004753_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004753_04.webp" alt="10004753_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10004753_05.webp" alt="10004753_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10005683_01.webp" alt="10005683_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005683_02.webp" alt="10005683_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005683_03.webp" alt="10005683_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005683_04.webp" alt="10005683_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005683_05.webp" alt="10005683_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10005942_01.webp" alt="10005942_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005942_02.webp" alt="10005942_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005942_03.webp" alt="10005942_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005942_04.webp" alt="10005942_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10005942_05.webp" alt="10005942_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/10006010_01.webp" alt="10006010_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10006010_02.webp" alt="10006010_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10006010_03.webp" alt="10006010_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10006010_04.webp" alt="10006010_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/10006010_05.webp" alt="10006010_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/d-57048_01.webp" alt="d-57048_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/d-57048_02.webp" alt="d-57048_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/d-57048_03.webp" alt="d-57048_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/d-57048_04.webp" alt="d-57048_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/d-57048_05.webp" alt="d-57048_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/e-57007_01.webp" alt="e-57007_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/e-57007_02.webp" alt="e-57007_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/e-57007_03.webp" alt="e-57007_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/e-57007_04.webp" alt="e-57007_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/e-57007_05.webp" alt="e-57007_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="02_毛ガニ/f-01022_01.webp" alt="f-01022_01.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/f-01022_02.webp" alt="f-01022_02.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/f-01022_03.webp" alt="f-01022_03.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/f-01022_04.webp" alt="f-01022_04.webp" onclick="openModal(this)">
+    <img src="02_毛ガニ/f-01022_05.webp" alt="f-01022_05.webp" onclick="openModal(this)">
+  </div>
+</div>
+<button class="accordion">03_いくら</button>
+<div class="panel">
+  <div class="image-row">
+    <img src="03_いくら/10000667_01.webp" alt="10000667_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000667_02.webp" alt="10000667_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000667_03.webp" alt="10000667_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000667_04.webp" alt="10000667_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000667_05.webp" alt="10000667_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10000921_01.webp" alt="10000921_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000921_02.webp" alt="10000921_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000921_03.webp" alt="10000921_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000921_04.webp" alt="10000921_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000921_05.webp" alt="10000921_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10000954_01.webp" alt="10000954_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000954_02.webp" alt="10000954_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000954_03.webp" alt="10000954_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000954_04.webp" alt="10000954_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10000954_05.webp" alt="10000954_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10001043_01.webp" alt="10001043_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001043_02.webp" alt="10001043_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001043_03.webp" alt="10001043_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001043_04.webp" alt="10001043_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001043_05.webp" alt="10001043_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10001045_01.webp" alt="10001045_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001045_02.webp" alt="10001045_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001045_03.webp" alt="10001045_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001045_04.webp" alt="10001045_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001045_05.webp" alt="10001045_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10001902_01.webp" alt="10001902_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001902_02.webp" alt="10001902_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001902_03.webp" alt="10001902_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001902_04.webp" alt="10001902_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10001902_05.webp" alt="10001902_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10003627_01.webp" alt="10003627_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003627_02.webp" alt="10003627_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003627_03.webp" alt="10003627_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003627_04.webp" alt="10003627_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003627_05.webp" alt="10003627_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10003630_01.webp" alt="10003630_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003630_02.webp" alt="10003630_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003630_03.webp" alt="10003630_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003630_04.webp" alt="10003630_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10003630_05.webp" alt="10003630_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10004581_01.webp" alt="10004581_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10004581_02.webp" alt="10004581_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10004581_03.webp" alt="10004581_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10004581_04.webp" alt="10004581_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10004581_05.webp" alt="10004581_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10005436_01.webp" alt="10005436_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005436_02.webp" alt="10005436_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005436_03.webp" alt="10005436_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005436_04.webp" alt="10005436_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005436_05.webp" alt="10005436_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/10005441_01.webp" alt="10005441_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005441_02.webp" alt="10005441_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005441_03.webp" alt="10005441_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005441_04.webp" alt="10005441_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/10005441_05.webp" alt="10005441_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/b-83004_01.webp" alt="b-83004_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/b-83004_02.webp" alt="b-83004_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/b-83004_03.webp" alt="b-83004_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/b-83004_04.webp" alt="b-83004_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/b-83004_05.webp" alt="b-83004_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="03_いくら/g-14011_01.webp" alt="g-14011_01.webp" onclick="openModal(this)">
+    <img src="03_いくら/g-14011_02.webp" alt="g-14011_02.webp" onclick="openModal(this)">
+    <img src="03_いくら/g-14011_03.webp" alt="g-14011_03.webp" onclick="openModal(this)">
+    <img src="03_いくら/g-14011_04.webp" alt="g-14011_04.webp" onclick="openModal(this)">
+    <img src="03_いくら/g-14011_05.webp" alt="g-14011_05.webp" onclick="openModal(this)">
+  </div>
+</div>
+<button class="accordion">04_たらば</button>
+<div class="panel">
+  <div class="image-row">
+    <img src="04_たらば/10001324_01.webp" alt="10001324_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001324_02.webp" alt="10001324_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001324_03.webp" alt="10001324_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001324_04.webp" alt="10001324_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001324_05.webp" alt="10001324_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/10001328_01.webp" alt="10001328_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001328_02.webp" alt="10001328_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001328_03.webp" alt="10001328_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001328_04.webp" alt="10001328_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10001328_05.webp" alt="10001328_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/10005521_01.webp" alt="10005521_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005521_02.webp" alt="10005521_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005521_03.webp" alt="10005521_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005521_04.webp" alt="10005521_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005521_05.webp" alt="10005521_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/10005651_01.webp" alt="10005651_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005651_02.webp" alt="10005651_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005651_03.webp" alt="10005651_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005651_04.webp" alt="10005651_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005651_05.webp" alt="10005651_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/10005676_01.webp" alt="10005676_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005676_02.webp" alt="10005676_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005676_03.webp" alt="10005676_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005676_04.webp" alt="10005676_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005676_05.webp" alt="10005676_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/10005713_01.webp" alt="10005713_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005713_02.webp" alt="10005713_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005713_03.webp" alt="10005713_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005713_04.webp" alt="10005713_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005713_05.webp" alt="10005713_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/10005861_01.webp" alt="10005861_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005861_02.webp" alt="10005861_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005861_03.webp" alt="10005861_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005861_04.webp" alt="10005861_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/10005861_05.webp" alt="10005861_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/c-11056_01.webp" alt="c-11056_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-11056_02.webp" alt="c-11056_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-11056_03.webp" alt="c-11056_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-11056_04.webp" alt="c-11056_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-11056_05.webp" alt="c-11056_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/c-57044_01.webp" alt="c-57044_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57044_02.webp" alt="c-57044_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57044_03.webp" alt="c-57044_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57044_04.webp" alt="c-57044_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57044_05.webp" alt="c-57044_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/c-57057_01.webp" alt="c-57057_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57057_02.webp" alt="c-57057_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57057_03.webp" alt="c-57057_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57057_04.webp" alt="c-57057_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/c-57057_05.webp" alt="c-57057_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/d-57047_01.webp" alt="d-57047_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-57047_02.webp" alt="d-57047_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-57047_03.webp" alt="d-57047_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-57047_04.webp" alt="d-57047_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-57047_05.webp" alt="d-57047_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/d-59040_01.webp" alt="d-59040_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-59040_02.webp" alt="d-59040_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-59040_03.webp" alt="d-59040_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-59040_04.webp" alt="d-59040_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/d-59040_05.webp" alt="d-59040_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/f-11028_01.webp" alt="f-11028_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-11028_02.webp" alt="f-11028_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-11028_03.webp" alt="f-11028_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-11028_04.webp" alt="f-11028_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-11028_05.webp" alt="f-11028_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/f-14028_01.webp" alt="f-14028_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-14028_02.webp" alt="f-14028_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-14028_03.webp" alt="f-14028_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-14028_04.webp" alt="f-14028_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/f-14028_05.webp" alt="f-14028_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="04_たらば/g-14010_01.webp" alt="g-14010_01.webp" onclick="openModal(this)">
+    <img src="04_たらば/g-14010_02.webp" alt="g-14010_02.webp" onclick="openModal(this)">
+    <img src="04_たらば/g-14010_03.webp" alt="g-14010_03.webp" onclick="openModal(this)">
+    <img src="04_たらば/g-14010_04.webp" alt="g-14010_04.webp" onclick="openModal(this)">
+    <img src="04_たらば/g-14010_05.webp" alt="g-14010_05.webp" onclick="openModal(this)">
+  </div>
+</div>
+<button class="accordion">05_ホタテ</button>
+<div class="panel">
+  <div class="image-row">
+    <img src="05_ホタテ/10000536_01.webp" alt="10000536_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000536_02.webp" alt="10000536_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000536_03.webp" alt="10000536_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000536_04.webp" alt="10000536_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000536_05.webp" alt="10000536_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10000951_01.webp" alt="10000951_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000951_02.webp" alt="10000951_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000951_03.webp" alt="10000951_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000951_04.webp" alt="10000951_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10000951_05.webp" alt="10000951_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10001124_01.webp" alt="10001124_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001124_02.webp" alt="10001124_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001124_03.webp" alt="10001124_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001124_04.webp" alt="10001124_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001124_05.webp" alt="10001124_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10001125_01.webp" alt="10001125_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001125_02.webp" alt="10001125_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001125_03.webp" alt="10001125_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001125_04.webp" alt="10001125_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001125_05.webp" alt="10001125_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10001502_01.webp" alt="10001502_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001502_02.webp" alt="10001502_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001502_03.webp" alt="10001502_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001502_04.webp" alt="10001502_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10001502_05.webp" alt="10001502_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10003433_01.webp" alt="10003433_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003433_02.webp" alt="10003433_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003433_03.webp" alt="10003433_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003433_04.webp" alt="10003433_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003433_05.webp" alt="10003433_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10003798_01.webp" alt="10003798_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003798_02.webp" alt="10003798_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003798_03.webp" alt="10003798_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003798_04.webp" alt="10003798_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10003798_05.webp" alt="10003798_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10004086_01.webp" alt="10004086_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004086_02.webp" alt="10004086_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004086_03.webp" alt="10004086_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004086_04.webp" alt="10004086_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004086_05.webp" alt="10004086_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10004170_01.webp" alt="10004170_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004170_02.webp" alt="10004170_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004170_03.webp" alt="10004170_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004170_04.webp" alt="10004170_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004170_05.webp" alt="10004170_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10004332_01.webp" alt="10004332_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004332_02.webp" alt="10004332_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004332_03.webp" alt="10004332_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004332_04.webp" alt="10004332_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10004332_05.webp" alt="10004332_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/10005218_01.webp" alt="10005218_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10005218_02.webp" alt="10005218_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10005218_03.webp" alt="10005218_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10005218_04.webp" alt="10005218_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/10005218_05.webp" alt="10005218_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/a-42125_01.webp" alt="a-42125_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/a-42125_02.webp" alt="a-42125_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/a-42125_03.webp" alt="a-42125_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/a-42125_04.webp" alt="a-42125_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/a-42125_05.webp" alt="a-42125_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/b-32044_01.webp" alt="b-32044_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/b-32044_02.webp" alt="b-32044_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/b-32044_03.webp" alt="b-32044_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/b-32044_04.webp" alt="b-32044_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/b-32044_05.webp" alt="b-32044_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="05_ホタテ/c-32027_01.webp" alt="c-32027_01.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/c-32027_02.webp" alt="c-32027_02.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/c-32027_03.webp" alt="c-32027_03.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/c-32027_04.webp" alt="c-32027_04.webp" onclick="openModal(this)">
+    <img src="05_ホタテ/c-32027_05.webp" alt="c-32027_05.webp" onclick="openModal(this)">
+  </div>
+</div>
+</body>
+</html>
