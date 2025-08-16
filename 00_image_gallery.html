@@ -79,11 +79,32 @@
     width: auto;
     height: auto;
   }
-  #caption {
+  #caption-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 15px;
+  }
+  #caption {
+    margin-right: 10px;
     color: #ccc;
     font-size: 18px;
-    text-align: center;
+  }
+  #copyFilenameButton {
+    padding: 8px 15px;
+    cursor: pointer;
+  }
+  #notificationMessage {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none; /* Hidden by default */
   }
   .close {
     position: absolute;
@@ -298,9 +319,14 @@
   <span class="close" onclick="closeModal()">&times;</span>
   <div class="modal-container">
     <img class="modal-content" id="modalImage">
-    <div id="caption"></div>
+    <div id="caption-container" style="display: flex; align-items: center; justify-content: center; margin-top: 15px;">
+      <div id="caption" style="margin-right: 10px; color: #ccc; font-size: 18px;"></div>
+      <button id="copyFilenameButton" style="padding: 8px 15px; cursor: pointer;">ファイル名をコピー</button>
+    </div>
   </div>
 </div>
+
+<div id="notificationMessage"></div>
 
 <script>
   function initializeAccordions() {
@@ -331,7 +357,32 @@
   function openModal(elem) {
     modal.style.display = "flex";
     modalImg.src = elem.src;
-    captionText.innerHTML = elem.alt;
+    const fullFilename = elem.alt;
+    captionText.innerHTML = fullFilename;
+
+    const copyButton = document.getElementById('copyFilenameButton');
+    copyButton.onclick = function() {
+      copyFilename(fullFilename);
+    };
+  }
+
+  function copyFilename(fullFilename) {
+    const filenameWithoutExtension = fullFilename.split('.').slice(0, -1).join('.');
+    const notification = document.getElementById('notificationMessage');
+    navigator.clipboard.writeText(filenameWithoutExtension).then(() => {
+      notification.textContent = 'ファイル名をコピーしました: ' + filenameWithoutExtension;
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 500); // 0.5 seconds
+    }).catch(err => {
+      console.error('ファイル名のコピーに失敗しました: ', err);
+      notification.textContent = 'ファイル名のコピーに失敗しました。';
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 500); // 0.5 seconds
+    });
   }
 
   function closeModal() {
