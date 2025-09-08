@@ -79,32 +79,11 @@
     width: auto;
     height: auto;
   }
-  #caption-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 15px;
-  }
   #caption {
-    margin-right: 10px;
+    margin-top: 15px;
     color: #ccc;
     font-size: 18px;
-  }
-  #copyFilenameButton {
-    padding: 8px 15px;
-    cursor: pointer;
-  }
-  #notificationMessage {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #333;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    z-index: 1000;
-    display: none; /* Hidden by default */
+    text-align: center;
   }
   .close {
     position: absolute;
@@ -319,14 +298,9 @@
   <span class="close" onclick="closeModal()">&times;</span>
   <div class="modal-container">
     <img class="modal-content" id="modalImage">
-    <div id="caption-container" style="display: flex; align-items: center; justify-content: center; margin-top: 15px;">
-      <div id="caption" style="margin-right: 10px; color: #ccc; font-size: 18px;"></div>
-      <button id="copyFilenameButton" style="padding: 8px 15px; cursor: pointer;">ファイル名をコピー</button>
-    </div>
+    <div id="caption"></div>
   </div>
 </div>
-
-<div id="notificationMessage"></div>
 
 <script>
   function initializeAccordions() {
@@ -357,32 +331,7 @@
   function openModal(elem) {
     modal.style.display = "flex";
     modalImg.src = elem.src;
-    const fullFilename = elem.alt;
-    captionText.innerHTML = fullFilename;
-
-    const copyButton = document.getElementById('copyFilenameButton');
-    copyButton.onclick = function() {
-      copyFilename(fullFilename);
-    };
-  }
-
-  function copyFilename(fullFilename) {
-    const filenameWithoutExtension = fullFilename.split('.').slice(0, -1).join('.');
-    const notification = document.getElementById('notificationMessage');
-    navigator.clipboard.writeText(filenameWithoutExtension).then(() => {
-      notification.textContent = 'ファイル名をコピーしました: ' + filenameWithoutExtension;
-      notification.style.display = 'block';
-      setTimeout(() => {
-        notification.style.display = 'none';
-      }, 500); // 0.5 seconds
-    }).catch(err => {
-      console.error('ファイル名のコピーに失敗しました: ', err);
-      notification.textContent = 'ファイル名のコピーに失敗しました。';
-      notification.style.display = 'block';
-      setTimeout(() => {
-        notification.style.display = 'none';
-      }, 500); // 0.5 seconds
-    });
+    captionText.innerHTML = elem.alt;
   }
 
   function closeModal() {
@@ -788,10 +737,646 @@
   <div class="image-row">
     <img src="05_ホタテ/c-32027_01.webp" alt="c-32027_01.webp" onclick="openModal(this)">
     <img src="05_ホタテ/c-32027_02.webp" alt="c-32027_02.webp" onclick="openModal(this)">
-    <img src="05_ホタテ/c-32027_03.webp" alt="c-32027_03.webp" onclick="openModal(this)">
-    <img src="05_ホタテ/c-32027_04.webp" alt="c-32027_04.webp" onclick="openModal(this)">
-    <img src="05_ホタテ/c-32027_05.webp" alt="c-32027_05.webp" onclick="openModal(this)">
+    <img src="05_8月データ/new4_yawarakani/new4_yawarakani_01.webp" alt="new4_yawarakani_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_02.webp" alt="new4_yawarakani_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_03.webp" alt="new4_yawarakani_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_04.webp" alt="new4_yawarakani_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_05.webp" alt="new4_yawarakani_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_new4.webp" alt="new4_yawarakani_new4.webp" onclick="openModal(this)">
   </div>
 </div>
+<button class="accordion">06_8月データ</button>
+<div class="panel">
+  <div class="image-row">
+    <img src="06_8月データ/01_A-11001/A-11001_01.webp" alt="A-11001_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-11001/A-11001_02.webp" alt="A-11001_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-11001/A-11001_03.webp" alt="A-11001_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-11001/A-11001_04.webp" alt="A-11001_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-11001/A-11001_05.webp" alt="A-11001_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/01_A-11001/A-11001_A-11001.webp" alt="A-11001_A-11001.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-11001/A-11001_G-11039.webp" alt="A-11001_G-11039.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_01.webp" alt="A-54003_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_02.webp" alt="A-54003_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_03.webp" alt="A-54003_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/01_A-54003/A-54003_04.webp" alt="A-54003_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_05.webp" alt="A-54003_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_A-54003.webp" alt="A-54003_A-54003.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_B-54003.webp" alt="A-54003_B-54003.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_C-54003.webp" alt="A-54003_C-54003.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/01_A-54003/A-54003_D-54003.webp" alt="A-54003_D-54003.webp" onclick="openModal(this)">
+    <img src="06_8月データ/01_A-54003/A-54003_G-54001.webp" alt="A-54003_G-54001.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/02_A-11004/A-11004_01.webp" alt="A-11004_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-11004/A-11004_02.webp" alt="A-11004_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-11004/A-11004_03.webp" alt="A-11004_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-11004/A-11004_04.webp" alt="A-11004_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-11004/A-11004_05.webp" alt="A-11004_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/02_A-11004/A-11004_A-11004.webp" alt="A-11004_A-11004.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-11004/A-11004_G-11012.webp" alt="A-11004_G-11012.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_01.webp" alt="A-54004_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_02.webp" alt="A-54004_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_03.webp" alt="A-54004_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/02_A-54004/A-54004_04.webp" alt="A-54004_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_05.webp" alt="A-54004_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_A-54004.webp" alt="A-54004_A-54004.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_C-54005.webp" alt="A-54004_C-54005.webp" onclick="openModal(this)">
+    <img src="06_8月データ/02_A-54004/A-54004_D-54006.webp" alt="A-54004_D-54006.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/03_A-11006/A-11006_01.webp" alt="A-11006_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/03_A-11006/A-11006_02.webp" alt="A-11006_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/03_A-11006/A-11006_03.webp" alt="A-11006_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/03_A-11006/A-11006_04.webp" alt="A-11006_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/03_A-11006/A-11006_05.webp" alt="A-11006_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/03_A-11006/A-11006_A-11006.webp" alt="A-11006_A-11006.webp" onclick="openModal(this)">
+    <img src="06_8月データ/03_A-11006/A-11006_G-11038.webp" alt="A-11006_G-11038.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/04_A-11009/A-11009_01.webp" alt="A-11009_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-11009/A-11009_02.webp" alt="A-11009_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-11009/A-11009_03.webp" alt="A-11009_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-11009/A-11009_04.webp" alt="A-11009_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-11009/A-11009_05.webp" alt="A-11009_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/04_A-11009/A-11009_A-11009.webp" alt="A-11009_A-11009.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-11009/A-11009_G-11037.webp" alt="A-11009_G-11037.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_01.webp" alt="A-54009_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_02.webp" alt="A-54009_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_03.webp" alt="A-54009_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/04_A-54009/A-54009_04.webp" alt="A-54009_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_05.webp" alt="A-54009_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_A-54009.webp" alt="A-54009_A-54009.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_B-54006.webp" alt="A-54009_B-54006.webp" onclick="openModal(this)">
+    <img src="06_8月データ/04_A-54009/A-54009_C-54008.webp" alt="A-54009_C-54008.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/04_A-54009/A-54009_D-54008.webp" alt="A-54009_D-54008.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/05_A-11005/A-11005_01.webp" alt="A-11005_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_02.webp" alt="A-11005_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_03.webp" alt="A-11005_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_04.webp" alt="A-11005_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_05.webp" alt="A-11005_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/05_A-11005/A-11005_06.webp" alt="A-11005_06.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_07.webp" alt="A-11005_07.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_08.webp" alt="A-11005_08.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_09.webp" alt="A-11005_09.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_10.webp" alt="A-11005_10.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/05_A-11005/A-11005_A-11005.webp" alt="A-11005_A-11005.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_A-11101.webp" alt="A-11005_A-11101.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_B-11010.webp" alt="A-11005_B-11010.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_B-11012.webp" alt="A-11005_B-11012.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-11005/A-11005_G-11010.webp" alt="A-11005_G-11010.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/05_A-11005/A-11005_G-11011.webp" alt="A-11005_G-11011.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-19002/A-19002_01.webp" alt="A-19002_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-19002/A-19002_02.webp" alt="A-19002_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-19002/A-19002_03.webp" alt="A-19002_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-19002/A-19002_04.webp" alt="A-19002_04.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/05_A-19002/A-19002_05.webp" alt="A-19002_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-19002/A-19002_A-19002.webp" alt="A-19002_A-19002.webp" onclick="openModal(this)">
+    <img src="06_8月データ/05_A-19002/A-19002_G-19002.webp" alt="A-19002_G-19002.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/06_A-11002/A-11002_01.webp" alt="A-11002_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-11002/A-11002_02.webp" alt="A-11002_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-11002/A-11002_03.webp" alt="A-11002_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-11002/A-11002_04.webp" alt="A-11002_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-11002/A-11002_05.webp" alt="A-11002_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/06_A-11002/A-11002_A-11002.webp" alt="A-11002_A-11002.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-11002/A-11002_G-11052.webp" alt="A-11002_G-11052.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-54013/A-54013_01.webp" alt="A-54013_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-54013/A-54013_02.webp" alt="A-54013_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-54013/A-54013_03.webp" alt="A-54013_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/06_A-54013/A-54013_04.webp" alt="A-54013_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-54013/A-54013_05.webp" alt="A-54013_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-54013/A-54013_A-54013_2.webp" alt="A-54013_A-54013_2.webp" onclick="openModal(this)">
+    <img src="06_8月データ/06_A-54013/A-54013_A-54013_3.webp" alt="A-54013_A-54013_3.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/07_A-54013/A-54013_01.webp" alt="A-54013_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/07_A-54013/A-54013_02.webp" alt="A-54013_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/07_A-54013/A-54013_03.webp" alt="A-54013_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/07_A-54013/A-54013_04.webp" alt="A-54013_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/07_A-54013/A-54013_05.webp" alt="A-54013_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/07_A-54013/A-54013_A-54013.webp" alt="A-54013_A-54013.webp" onclick="openModal(this)">
+    <img src="06_8月データ/07_A-54013/A-54013_G-54002.webp" alt="A-54013_G-54002.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/08_A-11170/A-11170_01.webp" alt="A-11170_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-11170/A-11170_02.webp" alt="A-11170_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-11170/A-11170_03.webp" alt="A-11170_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-11170/A-11170_04.webp" alt="A-11170_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-11170/A-11170_05.webp" alt="A-11170_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/08_A-11170/A-11170_A-11170.webp" alt="A-11170_A-11170.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-11170/A-11170_B-11041.webp" alt="A-11170_B-11041.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-78022/A-78022_01.webp" alt="A-78022_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-78022/A-78022_02.webp" alt="A-78022_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-78022/A-78022_03.webp" alt="A-78022_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/08_A-78022/A-78022_04.webp" alt="A-78022_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-78022/A-78022_05.webp" alt="A-78022_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/08_A-78022/A-78022_A-78022.webp" alt="A-78022_A-78022.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/09_A-78023/A-78023_01.webp" alt="A-78023_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/09_A-78023/A-78023_02.webp" alt="A-78023_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/09_A-78023/A-78023_03.webp" alt="A-78023_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/09_A-78023/A-78023_04.webp" alt="A-78023_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/09_A-78023/A-78023_05.webp" alt="A-78023_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/09_A-78023/A-78023_A-78023.webp" alt="A-78023_A-78023.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/10_A-78031/A-78031_01.webp" alt="A-78031_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/10_A-78031/A-78031_02.webp" alt="A-78031_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/10_A-78031/A-78031_03.webp" alt="A-78031_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/10_A-78031/A-78031_04.webp" alt="A-78031_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/10_A-78031/A-78031_05.webp" alt="A-78031_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/10_A-78031/A-78031_A-78031.webp" alt="A-78031_A-78031.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/11_A-11221/A-11221_01.webp" alt="A-11221_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_A-11221/A-11221_02.webp" alt="A-11221_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_A-11221/A-11221_03.webp" alt="A-11221_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_A-11221/A-11221_04.webp" alt="A-11221_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_A-11221/A-11221_05.webp" alt="A-11221_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/11_A-11221/A-11221_A-11221.webp" alt="A-11221_A-11221.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_A-11221/A-11221_B-11084.webp" alt="A-11221_B-11084.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_B-78020/B-78020_01.webp" alt="B-78020_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_B-78020/B-78020_02.webp" alt="B-78020_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_B-78020/B-78020_03.webp" alt="B-78020_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/11_B-78020/B-78020_04.webp" alt="B-78020_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_B-78020/B-78020_05.webp" alt="B-78020_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/11_B-78020/B-78020_B-78020.webp" alt="B-78020_B-78020.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/12_A-11222/A-11222_01.webp" alt="A-11222_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_A-11222/A-11222_02.webp" alt="A-11222_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_A-11222/A-11222_03.webp" alt="A-11222_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_A-11222/A-11222_04.webp" alt="A-11222_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_A-11222/A-11222_05.webp" alt="A-11222_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/12_A-11222/A-11222_A-11222.webp" alt="A-11222_A-11222.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_A-11222/A-11222_B-11086.webp" alt="A-11222_B-11086.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_G-78007/G-78007_01.webp" alt="G-78007_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_G-78007/G-78007_02.webp" alt="G-78007_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_G-78007/G-78007_03.webp" alt="G-78007_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/12_G-78007/G-78007_04.webp" alt="G-78007_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_G-78007/G-78007_05.webp" alt="G-78007_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/12_G-78007/G-78007_G-78007.webp" alt="G-78007_G-78007.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/13_A-11225/A-11225_01.webp" alt="A-11225_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_A-11225/A-11225_02.webp" alt="A-11225_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_A-11225/A-11225_03.webp" alt="A-11225_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_A-11225/A-11225_04.webp" alt="A-11225_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_A-11225/A-11225_05.webp" alt="A-11225_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/13_A-11225/A-11225_A-11225.webp" alt="A-11225_A-11225.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_A-11225/A-11225_B-11088.webp" alt="A-11225_B-11088.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_G-78009/G-78009_01.webp" alt="G-78009_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_G-78009/G-78009_02.webp" alt="G-78009_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_G-78009/G-78009_03.webp" alt="G-78009_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/13_G-78009/G-78009_04.webp" alt="G-78009_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_G-78009/G-78009_05.webp" alt="G-78009_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/13_G-78009/G-78009_G-78009.webp" alt="G-78009_G-78009.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/14_1_C-30011/C-30011_01.webp" alt="C-30011_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_1_C-30011/C-30011_02.webp" alt="C-30011_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_1_C-30011/C-30011_03.webp" alt="C-30011_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_1_C-30011/C-30011_04.webp" alt="C-30011_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_1_C-30011/C-30011_05.webp" alt="C-30011_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/14_1_C-30011/C-30011_C-30011.webp" alt="C-30011_C-30011.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_2_C-36011/C-36011_01.webp" alt="C-36011_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_2_C-36011/C-36011_02.webp" alt="C-36011_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_2_C-36011/C-36011_03.webp" alt="C-36011_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_2_C-36011/C-36011_04.webp" alt="C-36011_04.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/14_2_C-36011/C-36011_05.webp" alt="C-36011_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_2_C-36011/C-36011_C-36011.webp" alt="C-36011_C-36011.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_3_C-76007/C-76007_01.webp" alt="C-76007_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_3_C-76007/C-76007_02.webp" alt="C-76007_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_3_C-76007/C-76007_03.webp" alt="C-76007_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/14_3_C-76007/C-76007_04.webp" alt="C-76007_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_3_C-76007/C-76007_05.webp" alt="C-76007_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_3_C-76007/C-76007_C-76007.webp" alt="C-76007_C-76007.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_4_C-70032/C-70032_01.webp" alt="C-70032_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_4_C-70032/C-70032_02.webp" alt="C-70032_02.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/14_4_C-70032/C-70032_03.webp" alt="C-70032_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_4_C-70032/C-70032_04.webp" alt="C-70032_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_4_C-70032/C-70032_05.webp" alt="C-70032_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/14_4_C-70032/C-70032_C-70032.webp" alt="C-70032_C-70032.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_1_A-30063/A-30063_01.webp" alt="A-30063_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_1_A-30063/A-30063_02.webp" alt="A-30063_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_1_A-30063/A-30063_03.webp" alt="A-30063_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_1_A-30063/A-30063_04.webp" alt="A-30063_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_1_A-30063/A-30063_05.webp" alt="A-30063_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_1_A-30063/A-30063_A-30063_1.webp" alt="A-30063_A-30063_1.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_1_A-30063/A-30063_A-30063_2.webp" alt="A-30063_A-30063_2.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_2_A-36064/A-36064_01.webp" alt="A-36064_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_2_A-36064/A-36064_02.webp" alt="A-36064_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_2_A-36064/A-36064_03.webp" alt="A-36064_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_2_A-36064/A-36064_04.webp" alt="A-36064_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_2_A-36064/A-36064_05.webp" alt="A-36064_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_2_A-36064/A-36064_A-36064_1.webp" alt="A-36064_A-36064_1.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_2_A-36064/A-36064_A-36064_2.webp" alt="A-36064_A-36064_2.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_3_A-70064/A-70064_01.webp" alt="A-70064_01.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_3_A-70064/A-70064_02.webp" alt="A-70064_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_3_A-70064/A-70064_03.webp" alt="A-70064_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_3_A-70064/A-70064_04.webp" alt="A-70064_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_3_A-70064/A-70064_05.webp" alt="A-70064_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_3_A-70064/A-70064_A-70064_1.webp" alt="A-70064_A-70064_1.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_3_A-70064/A-70064_A-70064_2.webp" alt="A-70064_A-70064_2.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_4_A-76038/A-76038_01.webp" alt="A-76038_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_4_A-76038/A-76038_02.webp" alt="A-76038_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_4_A-76038/A-76038_03.webp" alt="A-76038_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_4_A-76038/A-76038_04.webp" alt="A-76038_04.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_4_A-76038/A-76038_05.webp" alt="A-76038_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_4_A-76038/A-76038_A-76038_1.webp" alt="A-76038_A-76038_1.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_4_A-76038/A-76038_A-76038_2.webp" alt="A-76038_A-76038_2.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_C-11056/C-11056_01.webp" alt="C-11056_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_C-11056/C-11056_02.webp" alt="C-11056_02.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/15_C-11056/C-11056_03.webp" alt="C-11056_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_C-11056/C-11056_04.webp" alt="C-11056_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_C-11056/C-11056_05.webp" alt="C-11056_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_C-11056/C-11056_C-11056.webp" alt="C-11056_C-11056.webp" onclick="openModal(this)">
+    <img src="06_8月データ/15_C-11056/C-11056_D-11048.webp" alt="C-11056_D-11048.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/16_A-54011/A-54011_01.webp" alt="A-54011_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_02.webp" alt="A-54011_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_03.webp" alt="A-54011_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_04.webp" alt="A-54011_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_05.webp" alt="A-54011_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/16_A-54011/A-54011_06.webp" alt="A-54011_06.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_A-54010.webp" alt="A-54011_A-54010.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_A-54011.webp" alt="A-54011_A-54011.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_B-54008.webp" alt="A-54011_B-54008.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_B-54009.webp" alt="A-54011_B-54009.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/16_A-54011/A-54011_C-54009.webp" alt="A-54011_C-54009.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_A-54011/A-54011_D-54009.webp" alt="A-54011_D-54009.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_01.webp" alt="D-11047_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_02.webp" alt="D-11047_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_03.webp" alt="D-11047_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/16_D-11047/D-11047_04.webp" alt="D-11047_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_05.webp" alt="D-11047_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_D-11047.webp" alt="D-11047_D-11047.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_D-11052.webp" alt="D-11047_D-11052.webp" onclick="openModal(this)">
+    <img src="06_8月データ/16_D-11047/D-11047_F-11028.webp" alt="D-11047_F-11028.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/17_A-54012/A-54012_01.webp" alt="A-54012_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/17_A-54012/A-54012_02.webp" alt="A-54012_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/17_A-54012/A-54012_03.webp" alt="A-54012_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/17_A-54012/A-54012_04.webp" alt="A-54012_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/17_A-54012/A-54012_05.webp" alt="A-54012_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/17_A-54012/A-54012_A-54012.webp" alt="A-54012_A-54012.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/18_A-54014/A-54014_01.webp" alt="A-54014_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/18_A-54014/A-54014_02.webp" alt="A-54014_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/18_A-54014/A-54014_03.webp" alt="A-54014_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/18_A-54014/A-54014_04.webp" alt="A-54014_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/18_A-54014/A-54014_05.webp" alt="A-54014_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/18_A-54014/A-54014_A-54014.webp" alt="A-54014_A-54014.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/19_A-11223/A-11223_01.webp" alt="A-11223_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_02.webp" alt="A-11223_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_03.webp" alt="A-11223_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_04.webp" alt="A-11223_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_05.webp" alt="A-11223_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/19_A-11223/A-11223_A-11223.webp" alt="A-11223_A-11223.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_B-11077.webp" alt="A-11223_B-11077.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_C-11025.webp" alt="A-11223_C-11025.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_C-11052.webp" alt="A-11223_C-11052.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_D-11019.webp" alt="A-11223_D-11019.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/19_A-11223/A-11223_D-11046.webp" alt="A-11223_D-11046.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_E-11001.webp" alt="A-11223_E-11001.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_E-11022.webp" alt="A-11223_E-11022.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-11223/A-11223_G-11020.webp" alt="A-11223_G-11020.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-54015/A-54015_01.webp" alt="A-54015_01.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/19_A-54015/A-54015_02.webp" alt="A-54015_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-54015/A-54015_03.webp" alt="A-54015_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-54015/A-54015_04.webp" alt="A-54015_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-54015/A-54015_05.webp" alt="A-54015_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/19_A-54015/A-54015_A-54015.webp" alt="A-54015_A-54015.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/20_A-11240/A-11240_01.webp" alt="A-11240_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-11240/A-11240_02.webp" alt="A-11240_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-11240/A-11240_03.webp" alt="A-11240_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-11240/A-11240_04.webp" alt="A-11240_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-11240/A-11240_05.webp" alt="A-11240_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/20_A-11240/A-11240_A-11240.webp" alt="A-11240_A-11240.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-11240/A-11240_G-11054.webp" alt="A-11240_G-11054.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-54016/A-54016_01.webp" alt="A-54016_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-54016/A-54016_02.webp" alt="A-54016_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-54016/A-54016_03.webp" alt="A-54016_03.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/20_A-54016/A-54016_04.webp" alt="A-54016_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-54016/A-54016_05.webp" alt="A-54016_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/20_A-54016/A-54016_A-54016.webp" alt="A-54016_A-54016.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/21_A-54018/A-54018_01.webp" alt="A-54018_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/21_A-54018/A-54018_02.webp" alt="A-54018_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/21_A-54018/A-54018_03.webp" alt="A-54018_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/21_A-54018/A-54018_04.webp" alt="A-54018_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/21_A-54018/A-54018_05.webp" alt="A-54018_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/21_A-54018/A-54018_A-54018.webp" alt="A-54018_A-54018.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/22_new/22_new_01.webp" alt="22_new_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/22_new/22_new_02.webp" alt="22_new_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/22_new/22_new_03.webp" alt="22_new_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/22_new/22_new_04.webp" alt="22_new_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/22_new/22_new_05.webp" alt="22_new_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/22_new/22_new_2P.webp" alt="22_new_2P.webp" onclick="openModal(this)">
+    <img src="06_8月データ/22_new/22_new_3P.webp" alt="22_new_3P.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/23_A-11132/A-11132_01.webp" alt="A-11132_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-11132/A-11132_02.webp" alt="A-11132_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-11132/A-11132_03.webp" alt="A-11132_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-11132/A-11132_04.webp" alt="A-11132_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-11132/A-11132_05.webp" alt="A-11132_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/23_A-11132/A-11132_A-11132.webp" alt="A-11132_A-11132.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-19001/A-19001_01.webp" alt="A-19001_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-19001/A-19001_02.webp" alt="A-19001_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-19001/A-19001_03.webp" alt="A-19001_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-19001/A-19001_04.webp" alt="A-19001_04.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/23_A-19001/A-19001_05.webp" alt="A-19001_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/23_A-19001/A-19001_A-19001.webp" alt="A-19001_A-19001.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/24_A-11133/A-11133_01.webp" alt="A-11133_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-11133/A-11133_02.webp" alt="A-11133_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-11133/A-11133_03.webp" alt="A-11133_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-11133/A-11133_04.webp" alt="A-11133_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-11133/A-11133_05.webp" alt="A-11133_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/24_A-11133/A-11133_A-11133.webp" alt="A-11133_A-11133.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-19004/A-19004_01.webp" alt="A-19004_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-19004/A-19004_02.webp" alt="A-19004_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-19004/A-19004_03.webp" alt="A-19004_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-19004/A-19004_04.webp" alt="A-19004_04.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/24_A-19004/A-19004_05.webp" alt="A-19004_05.webp" onclick="openModal(this)">
+    <img src="06_8月データ/24_A-19004/A-19004_A-19004.webp" alt="A-19004_A-19004.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/25_new1/25_new1_01.webp" alt="25_new1_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/25_new1/25_new1_02.webp" alt="25_new1_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/25_new1/25_new1_03.webp" alt="25_new1_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/25_new1/25_new1_04.webp" alt="25_new1_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/25_new1/25_new1_05.webp" alt="25_new1_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/25_new1/25_new1_2P.webp" alt="25_new1_2P.webp" onclick="openModal(this)">
+    <img src="06_8月データ/25_new1/25_new1_3P.webp" alt="25_new1_3P.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/26_new2/26_new2_01.webp" alt="26_new2_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_02.webp" alt="26_new2_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_03.webp" alt="26_new2_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_04.webp" alt="26_new2_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_05.webp" alt="26_new2_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/26_new2/26_new2_1hai.webp" alt="26_new2_1hai.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_2hai.webp" alt="26_new2_2hai.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_3hai.webp" alt="26_new2_3hai.webp" onclick="openModal(this)">
+    <img src="06_8月データ/26_new2/26_new2_5hai.webp" alt="26_new2_5hai.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/27_A-20003/A-20003_01.webp" alt="A-20003_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/27_A-20003/A-20003_02.webp" alt="A-20003_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/27_A-20003/A-20003_03.webp" alt="A-20003_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/27_A-20003/A-20003_04.webp" alt="A-20003_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/27_A-20003/A-20003_05.webp" alt="A-20003_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/27_A-20003/A-20003_A-20003.webp" alt="A-20003_A-20003.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/28_F-20004/F-20004_01.webp" alt="F-20004_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/28_F-20004/F-20004_02.webp" alt="F-20004_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/28_F-20004/F-20004_03.webp" alt="F-20004_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/28_F-20004/F-20004_04.webp" alt="F-20004_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/28_F-20004/F-20004_05.webp" alt="F-20004_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/28_F-20004/F-20004_F-20004.webp" alt="F-20004_F-20004.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/29_A-81026/A-81026_01.webp" alt="A-81026_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_02.webp" alt="A-81026_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_03.webp" alt="A-81026_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_04.webp" alt="A-81026_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_05.webp" alt="A-81026_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/29_A-81026/A-81026_06.webp" alt="A-81026_06.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_07.webp" alt="A-81026_07.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_A-81026.webp" alt="A-81026_A-81026.webp" onclick="openModal(this)">
+    <img src="06_8月データ/29_A-81026/A-81026_B-81019.webp" alt="A-81026_B-81019.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/30_G-81001/G-81001_01.webp" alt="G-81001_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/30_G-81001/G-81001_02.webp" alt="G-81001_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/30_G-81001/G-81001_03.webp" alt="G-81001_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/30_G-81001/G-81001_04.webp" alt="G-81001_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/30_G-81001/G-81001_05.webp" alt="G-81001_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/30_G-81001/G-81001_2P.webp" alt="G-81001_2P.webp" onclick="openModal(this)">
+    <img src="06_8月データ/30_G-81001/G-81001_3P.webp" alt="G-81001_3P.webp" onclick="openModal(this)">
+    <img src="06_8月データ/30_G-81001/G-81001_5P.webp" alt="G-81001_5P.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/31_F-20011/F-20011_01.webp" alt="F-20011_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/31_F-20011/F-20011_02.webp" alt="F-20011_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/31_F-20011/F-20011_03.webp" alt="F-20011_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/31_F-20011/F-20011_04.webp" alt="F-20011_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/31_F-20011/F-20011_05.webp" alt="F-20011_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/31_F-20011/F-20011_F-20011.webp" alt="F-20011_F-20011.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/44_A-09004/A-09004_01.webp" alt="A-09004_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/44_A-09004/A-09004_02.webp" alt="A-09004_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/44_A-09004/A-09004_03.webp" alt="A-09004_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/44_A-09004/A-09004_04.webp" alt="A-09004_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/44_A-09004/A-09004_05.webp" alt="A-09004_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/44_A-09004/A-09004_06.webp" alt="A-09004_06.webp" onclick="openModal(this)">
+    <img src="06_8月データ/44_A-09004/A-09004_A-09004.webp" alt="A-09004_A-09004.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/46_A-09017/A-09017_01.webp" alt="A-09017_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/46_A-09017/A-09017_02.webp" alt="A-09017_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/46_A-09017/A-09017_03.webp" alt="A-09017_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/46_A-09017/A-09017_04.webp" alt="A-09017_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/46_A-09017/A-09017_05.webp" alt="A-09017_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/46_A-09017/A-09017_A-09017.webp" alt="A-09017_A-09017.webp" onclick="openModal(this)">
+    <img src="06_8月データ/46_A-09017/A-09017_G-09016.webp" alt="A-09017_G-09016.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/50_A-09072/A-09072_01.webp" alt="A-09072_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/50_A-09072/A-09072_02.webp" alt="A-09072_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/50_A-09072/A-09072_03.webp" alt="A-09072_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/50_A-09072/A-09072_04.webp" alt="A-09072_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/50_A-09072/A-09072_05.webp" alt="A-09072_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/50_A-09072/A-09072_A-09072.webp" alt="A-09072_A-09072.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new1_yawarakani/new1_yawarakani_01.webp" alt="new1_yawarakani_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new1_yawarakani/new1_yawarakani_02.webp" alt="new1_yawarakani_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new1_yawarakani/new1_yawarakani_03.webp" alt="new1_yawarakani_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new1_yawarakani/new1_yawarakani_04.webp" alt="new1_yawarakani_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new1_yawarakani/new1_yawarakani_05.webp" alt="new1_yawarakani_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new1_yawarakani/new1_yawarakani_new1.webp" alt="new1_yawarakani_new1.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new2_yawarakani/new2_yawarakani_01.webp" alt="new2_yawarakani_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new2_yawarakani/new2_yawarakani_02.webp" alt="new2_yawarakani_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new2_yawarakani/new2_yawarakani_03.webp" alt="new2_yawarakani_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new2_yawarakani/new2_yawarakani_04.webp" alt="new2_yawarakani_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new2_yawarakani/new2_yawarakani_05.webp" alt="new2_yawarakani_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new2_yawarakani/new2_yawarakani_new2.webp" alt="new2_yawarakani_new2.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new3_yawarakani/new3_yawarakani_01.webp" alt="new3_yawarakani_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new3_yawarakani/new3_yawarakani_02.webp" alt="new3_yawarakani_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new3_yawarakani/new3_yawarakani_03.webp" alt="new3_yawarakani_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new3_yawarakani/new3_yawarakani_04.webp" alt="new3_yawarakani_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new3_yawarakani/new3_yawarakani_05.webp" alt="new3_yawarakani_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new3_yawarakani/new3_yawarakani_new3.webp" alt="new3_yawarakani_new3.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_01.webp" alt="new4_yawarakani_01.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_02.webp" alt="new4_yawarakani_02.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_03.webp" alt="new4_yawarakani_03.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_04.webp" alt="new4_yawarakani_04.webp" onclick="openModal(this)">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_05.webp" alt="new4_yawarakani_05.webp" onclick="openModal(this)">
+  </div>
+  <div class="image-row">
+    <img src="06_8月データ/new4_yawarakani/new4_yawarakani_new4.webp" alt="new4_yawarakani_new4.webp" onclick="openModal(this)">
+  </div>
+</div>
+
 </body>
 </html>
