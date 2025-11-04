@@ -77,16 +77,40 @@
       .modal-content {
         display: block;
         max-width: calc(100vw - 40px);
-        max-height: calc(100vh - 80px); /* Adjusted for caption */
+        /* ボタンの高さを考慮して調整 */
+        max-height: calc(100vh - 120px);
         width: auto;
         height: auto;
       }
-      #caption {
+      
+      /* ▼▼▼ ここから修正・追加したCSS ▼▼▼ */
+      #caption-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-top: 15px;
+        gap: 10px; /* 要素間の隙間 */
+        flex-wrap: wrap; /* 画面が狭い時に折り返す */
+      }
+      #caption {
         color: #ccc;
         font-size: 18px;
-        text-align: center;
+        margin: 5px; /* 折り返し時のマージン */
       }
+      #caption-container button {
+        padding: 5px 10px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #f1f1f1;
+        border: none;
+        border-radius: 3px;
+        color: #333;
+        margin: 5px; /* 折り返し時のマージン */
+      }
+      #caption-container button:hover {
+        background-color: #ddd;
+      }
+      /* ▲▲▲ ここまで修正・追加したCSS ▲▲▲ */
       .close {
         position: absolute;
         top: 15px;
@@ -298,7 +322,11 @@
       <span class="close" onclick="closeModal()">×</span>
       <div class="modal-container">
         <img class="modal-content" id="modalImage" />
-        <div id="caption"></div>
+        <div id="caption-container">
+          <span id="caption"></span>
+          <button id="copyFilenameBtn">ファイル名をコピー</button>
+          <button id="copyPrefixBtn">プレフィックスをコピー</button>
+        </div>
       </div>
     </div>
     <script>
@@ -326,13 +354,76 @@
       var modal = document.getElementById('myModal')
       var modalImg = document.getElementById('modalImage')
       var captionText = document.getElementById('caption')
+      // ボタンへの参照を追加
+      var copyFilenameBtn = document.getElementById('copyFilenameBtn')
+      var copyPrefixBtn = document.getElementById('copyPrefixBtn')
 
-      function openModal(elem) {
-        modal.style.display = 'flex'
-        modalImg.src = elem.src
-        captionText.innerHTML = elem.alt
+      // クリップボードにコピーするヘルパー関数
+      function copyToClipboard(text, btn) {
+        // (https: でホストされていないと動作しない可能性があります)
+        if (!navigator.clipboard) {
+          alert('この環境ではコピー機能は利用できません。')
+          return
+        }
+        
+        navigator.clipboard
+          .writeText(text)
+          .then(function () {
+            // 成功したらボタンのテキストを一時的に変更
+            var originalText = btn.innerText
+            btn.innerText = 'コピーしました！'
+            setTimeout(function () {
+              btn.innerText = originalText
+            }, 1500)
+          })
+          .catch(function (err) {
+            console.error('コピーに失敗しました: ', err)
+            alert('コピーに失敗しました。')
+          })
       }
 
+      function openModal(elem) {
+        var filename = elem.alt // 例: "10000667_03.webp"
+        modal.style.display = 'flex'
+        modalImg.src = elem.src
+        captionText.innerHTML = filename
+
+        // 1. 「ファイル名をコピー」ボタンの処理 (拡張子なし)
+        copyFilenameBtn.onclick = function () {
+          var lastDotIndex = filename.lastIndexOf('.')
+          var nameWithoutExtension = filename
+          
+          // '.' が見つかり、それが最初の一文字でない場合
+          if (lastDotIndex > 0) {
+            nameWithoutExtension = filename.substring(0, lastDotIndex)
+          }
+          // 例: "10000667_03"
+          copyToClipboard(nameWithoutExtension, this)
+        }
+
+        // 2. 「プレフィックスをコピー」ボタンの処理 ('_' の前)
+        copyPrefixBtn.onclick = function () {
+          var firstUnderscoreIndex = filename.indexOf('_')
+          var prefix = filename
+          
+          if (firstUnderscoreIndex !== -1) {
+            // '_' が見つかった場合
+            // 例: "10000667"
+            prefix = filename.substring(0, firstUnderscoreIndex)
+          } else {
+            // '_' がない場合は、拡張子なしのファイル名をコピーする
+            var lastDotIndex = filename.lastIndexOf('.')
+            if (lastDotIndex > 0) {
+              prefix = filename.substring(0, lastDotIndex)
+            } else {
+              // 拡張子もない場合（例: "filename"）はそのまま
+              prefix = filename
+            }
+          }
+          copyToClipboard(prefix, this)
+        }
+      }
+      
       function closeModal() {
         modal.style.display = 'none'
       }
