@@ -358,69 +358,101 @@
       var copyFilenameBtn = document.getElementById('copyFilenameBtn')
       var copyPrefixBtn = document.getElementById('copyPrefixBtn')
 
-      // クリップボードにコピーするヘルパー関数
-      function copyToClipboard(text, btn) {
-        // (https: でホストされていないと動作しない可能性があります)
+ // クリップボードにコピーするヘルパー関数 (第2引数をコールバックに変更)
+      function copyToClipboard(text, onSuccessCallback) {
         if (!navigator.clipboard) {
           alert('この環境ではコピー機能は利用できません。')
+          if (onSuccessCallback) onSuccessCallback(); // 失敗時もUIを戻す
           return
         }
         
         navigator.clipboard
           .writeText(text)
           .then(function () {
-            // 成功したらボタンのテキストを一時的に変更
-            var originalText = btn.innerText
-            btn.innerText = 'コピーしました！'
+            // 成功したらタイマーをセット
             setTimeout(function () {
-              btn.innerText = originalText
-            }, 1500)
+              if (onSuccessCallback) onSuccessCallback(); // コールバックを実行
+            }, 1500) // 1.5秒後に実行
           })
           .catch(function (err) {
             console.error('コピーに失敗しました: ', err)
             alert('コピーに失敗しました。')
+            // エラー時もコールバックを実行してボタンを元に戻す
+            if (onSuccessCallback) onSuccessCallback();
           })
       }
+
+      // 各ボタンが処理中かどうかのフラグ (グローバルで管理)
+      var isCopyingFilename = false
+      var isCopyingPrefix = false
 
       function openModal(elem) {
         var filename = elem.alt // 例: "10000667_03.webp"
         modal.style.display = 'flex'
         modalImg.src = elem.src
         captionText.innerHTML = filename
+        
+        // ボタンの元のテキストを定義
+        var originalFilenameBtnText = 'ファイル名をコピー'
+        var originalPrefixBtnText = 'プレフィックスをコピー'
+
+        // ★ モーダルを開くたびに、フラグとボタンのテキストをリセット
+        isCopyingFilename = false
+        isCopyingPrefix = false
+        copyFilenameBtn.innerText = originalFilenameBtnText
+        copyPrefixBtn.innerText = originalPrefixBtnText
 
         // 1. 「ファイル名をコピー」ボタンの処理 (拡張子なし)
         copyFilenameBtn.onclick = function () {
+          // 処理中なら何もしない (連打防止)
+          if (isCopyingFilename) return; 
+
           var lastDotIndex = filename.lastIndexOf('.')
           var nameWithoutExtension = filename
           
-          // '.' が見つかり、それが最初の一文字でない場合
           if (lastDotIndex > 0) {
             nameWithoutExtension = filename.substring(0, lastDotIndex)
           }
-          // 例: "10000667_03"
-          copyToClipboard(nameWithoutExtension, this)
+          
+          // 処理中フラグを立て、テキストを変更
+          isCopyingFilename = true
+          copyFilenameBtn.innerText = 'コピーしました！'
+
+          // コピーを実行し、コールバックでテキストとフラグを元に戻す
+          copyToClipboard(nameWithoutExtension, function() {
+              copyFilenameBtn.innerText = originalFilenameBtnText
+              isCopyingFilename = false
+          })
         }
 
         // 2. 「プレフィックスをコピー」ボタンの処理 ('_' の前)
         copyPrefixBtn.onclick = function () {
+          // 処理中なら何もしない (連打防止)
+          if (isCopyingPrefix) return;
+
           var firstUnderscoreIndex = filename.indexOf('_')
           var prefix = filename
           
           if (firstUnderscoreIndex !== -1) {
-            // '_' が見つかった場合
-            // 例: "10000667"
             prefix = filename.substring(0, firstUnderscoreIndex)
           } else {
-            // '_' がない場合は、拡張子なしのファイル名をコピーする
             var lastDotIndex = filename.lastIndexOf('.')
             if (lastDotIndex > 0) {
               prefix = filename.substring(0, lastDotIndex)
             } else {
-              // 拡張子もない場合（例: "filename"）はそのまま
               prefix = filename
             }
           }
-          copyToClipboard(prefix, this)
+          
+          // 処理中フラグを立て、テキストを変更
+          isCopyingPrefix = true
+          copyPrefixBtn.innerText = 'コピーしました！'
+
+          // コピーを実行し、コールバックでテキストとフラグを元に戻す
+          copyToClipboard(prefix, function() {
+              copyPrefixBtn.innerText = originalPrefixBtnText
+              isCopyingPrefix = false
+          })
         }
       }
       
