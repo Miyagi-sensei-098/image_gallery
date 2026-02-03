@@ -159,55 +159,79 @@
 
       /* ▼▼▼ 検索機能のCSS ▼▼▼ */
       .search-container {
-        position: sticky;
-        top: 0;
-        background-color: #fff;
-        padding: 15px 0;
-        z-index: 10;
-        border-bottom: 1px solid #ddd;
+        background: #fff;
+        padding: 15px 20px 10px;
+        border-bottom: 1px solid #eee;
         margin-bottom: 10px;
+        text-align: center;
       }
       .search-input-wrapper {
         position: relative;
         display: inline-block;
         width: 100%;
-        max-width: 500px;
+        max-width: 550px;
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+        padding: 3px;
+        border-radius: 50px;
+      }
+      .search-input-wrapper::before {
+        content: '🔍';
+        position: absolute;
+        left: 21px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        z-index: 1;
+        opacity: 0.6;
       }
       #imageSearchInput {
         width: 100%;
-        padding: 12px 40px 12px 15px;
+        padding: 14px 50px 14px 50px;
         font-size: 16px;
-        border: 2px solid #007bff;
-        border-radius: 25px;
+        font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+        border: none;
+        border-radius: 50px;
         outline: none;
-        transition: border-color 0.3s, box-shadow 0.3s;
+        background: #fff;
+        transition: all 0.3s ease;
         box-sizing: border-box;
       }
+      #imageSearchInput::placeholder {
+        color: #888;
+        font-weight: 400;
+      }
       #imageSearchInput:focus {
-        border-color: #0056b3;
-        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        background: #fafafa;
       }
       #searchClearBtn {
         position: absolute;
-        right: 12px;
+        right: 16px;
         top: 50%;
         transform: translateY(-50%);
-        background: none;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
         border: none;
-        font-size: 20px;
-        color: #999;
+        font-size: 14px;
+        color: #fff;
         cursor: pointer;
         padding: 0;
-        line-height: 1;
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+        text-align: center;
+        border-radius: 50%;
         display: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(238, 90, 90, 0.4);
       }
       #searchClearBtn:hover {
-        color: #333;
+        background: linear-gradient(135deg, #ff5252, #e53935);
+        transform: translateY(-50%) scale(1.1);
       }
       #searchResultInfo {
-        margin-top: 10px;
+        margin-top: 12px;
         font-size: 14px;
-        color: #666;
+        color: #555;
+        font-weight: 500;
       }
       .image-row img.hidden {
         display: none;
@@ -769,12 +793,12 @@
       })
 
       // ページがスクロールされたときのイベント
-      window.onscroll = function () {
+      window.addEventListener('scroll', function () {
         // ボタン要素が取得できていれば実行 (エラー防止)
         if (scrollTopButton) {
           scrollFunction()
         }
-      }
+      })
 
       function scrollFunction() {
         // 100px以上スクロールしたらボタンを表示
