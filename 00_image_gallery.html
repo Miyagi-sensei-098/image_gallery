@@ -59,7 +59,7 @@
       .modal {
         display: none;
         position: fixed;
-        z-index: 1;
+        z-index: 100;
         left: 0;
         top: 0;
         width: 100%;
@@ -156,9 +156,82 @@
         opacity: 1;
       }
       /* ▲▲▲ ここまで修正 ▲▲▲ */
+
+      /* ▼▼▼ 検索機能のCSS ▼▼▼ */
+      .search-container {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        padding: 15px 0;
+        z-index: 10;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 10px;
+      }
+      .search-input-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        max-width: 500px;
+      }
+      #imageSearchInput {
+        width: 100%;
+        padding: 12px 40px 12px 15px;
+        font-size: 16px;
+        border: 2px solid #007bff;
+        border-radius: 25px;
+        outline: none;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        box-sizing: border-box;
+      }
+      #imageSearchInput:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+      }
+      #searchClearBtn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        display: none;
+      }
+      #searchClearBtn:hover {
+        color: #333;
+      }
+      #searchResultInfo {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #666;
+      }
+      .image-row img.hidden {
+        display: none;
+      }
+      .image-row.hidden {
+        display: none;
+      }
+      .panel.search-active {
+        display: block !important;
+      }
+      .accordion.search-active {
+        background-color: #ffffe0;
+      }
+      /* ▲▲▲ 検索機能のCSS ▲▲▲ */
     </style>
   </head>
   <body>
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <input type="text" id="imageSearchInput" placeholder="画像ファイル名で検索（例: A-09003）" />
+        <button id="searchClearBtn" type="button">✕</button>
+      </div>
+      <div id="searchResultInfo"></div>
+    </div>
     <button class="accordion">01_緑ラベル</button>
     <div class="panel">
       <div class="image-row">
@@ -717,6 +790,107 @@
         document.body.scrollTop = 0 // Safari用
         document.documentElement.scrollTop = 0 // Chrome, Firefox, IE, Opera用
       }
+
+      /* ▼▼▼ 検索機能のJavaScript ▼▼▼ */
+      function initializeSearch() {
+        var searchInput = document.getElementById('imageSearchInput')
+        var clearBtn = document.getElementById('searchClearBtn')
+        var resultInfo = document.getElementById('searchResultInfo')
+        var allImages = document.querySelectorAll('.panel img')
+        var allAccordions = document.querySelectorAll('.accordion')
+        var allPanels = document.querySelectorAll('.panel')
+
+        // 検索をリセットする共通関数
+        function resetSearch() {
+          allImages.forEach(function (img) {
+            img.classList.remove('hidden')
+          })
+          allAccordions.forEach(function (acc) {
+            acc.classList.remove('search-active')
+          })
+          allPanels.forEach(function (panel) {
+            panel.classList.remove('search-active')
+          })
+          document.querySelectorAll('.image-row').forEach(function (row) {
+            row.classList.remove('hidden')
+          })
+          resultInfo.textContent = ''
+          clearBtn.style.display = 'none'
+        }
+
+        // ✕ボタンのクリックイベント
+        clearBtn.addEventListener('click', function () {
+          searchInput.value = ''
+          resetSearch()
+          searchInput.focus()
+        })
+
+        searchInput.addEventListener('input', function () {
+          var query = this.value.toLowerCase().trim()
+
+          // クリアボタンの表示/非表示を切り替え
+          if (this.value.length > 0) {
+            clearBtn.style.display = 'block'
+          } else {
+            clearBtn.style.display = 'none'
+          }
+
+          if (query === '') {
+            resetSearch()
+            return
+          }
+
+          var matchCount = 0
+
+          // 全てのパネルとアコーディオンをリセット
+          allPanels.forEach(function (panel) {
+            panel.classList.remove('search-active')
+          })
+          allAccordions.forEach(function (acc) {
+            acc.classList.remove('search-active')
+          })
+
+          // 各画像をチェック
+          allImages.forEach(function (img) {
+            var src = img.getAttribute('src').toLowerCase()
+            var alt = img.getAttribute('alt').toLowerCase()
+
+            if (src.includes(query) || alt.includes(query)) {
+              img.classList.remove('hidden')
+              matchCount++
+
+              // 親のパネルとアコーディオンを表示
+              var panel = img.closest('.panel')
+              if (panel) {
+                panel.classList.add('search-active')
+                var accordion = panel.previousElementSibling
+                if (accordion && accordion.classList.contains('accordion')) {
+                  accordion.classList.add('search-active')
+                }
+              }
+            } else {
+              img.classList.add('hidden')
+            }
+          })
+
+          // image-rowが全て非表示の画像だけなら、行自体を非表示に
+          document.querySelectorAll('.image-row').forEach(function (row) {
+            var visibleImages = row.querySelectorAll('img:not(.hidden)')
+            if (visibleImages.length === 0) {
+              row.classList.add('hidden')
+            } else {
+              row.classList.remove('hidden')
+            }
+          })
+
+          resultInfo.textContent = matchCount + ' 件の画像が見つかりました'
+        })
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        initializeSearch()
+      })
+      /* ▲▲▲ 検索機能のJavaScript ▲▲▲ */
       /* ▲▲▲ ここまで修正 ▲▲▲ */
     </script>
     <button class="accordion">02_毛ガニ</button>
