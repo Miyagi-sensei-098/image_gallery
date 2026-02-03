@@ -1,0 +1,124 @@
+かしこまりました。ボタンが半透明（opacity: 0.7）で背景に紛れがちだったため、色をハッキリとした青色に変更し、影を追加してクッキリ見えるように修正します。
+
+この変更は、前回と同様にPythonスクリプトを実行するのが最も安全で確実です。 以下の指示書をコピーして、inst.txt としてGeminiCLIに実行させてください。
+
+📝 GeminiCLIへの指示書（ボタンのCSS修正）
+Markdown
+
+**タスク:**
+`00_image_gallery.html` のCSSを修正し、「トップへ戻るボタン」をよりハッキリと見えるデザインに変更します。
+以下の手順を順番に実行してください。
+
+**手順1: ファイルの作成**
+作業ディレクトリに `fix_button_style.py` という名前でファイルを作成し、以下のPythonコードを書き込んでください。
+
+```python
+# -*- coding: utf-8 -*-
+import shutil
+import os
+import sys
+
+# Filename to process
+filename = '00_image_gallery.html'
+# Backup filename
+backup_filename = '00_image_gallery.html.bak'
+
+# --- Define the CSS block to find (Old Style) ---
+find_str = """      /* ▼▼▼ ここから追加 ▼▼▼ */
+      #scrollTopBtn {
+        display: none; /* 初期状態では非表示 */
+        position: fixed; /* 画面に固定 */
+        bottom: 20px;
+        right: 30px;
+        z-index: 99; /* モーダルよりは手前に来ないようにする */
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        outline: none;
+        background-color: #555;
+        color: white;
+        cursor: pointer;
+        padding: 12px 15px;
+        border-radius: 50%; /* 円形にする */
+        opacity: 0.7;
+        transition: opacity 0.3s;
+      }
+      
+      #scrollTopBtn:hover {
+        background-color: #333;
+        opacity: 1;
+      }
+      /* ▲▲▲ ここまで追加 ▲▲▲ */"""
+
+# --- Define the new (fixed) CSS block ---
+replace_str = """      /* ▼▼▼ ここから修正 ▼▼▼ */
+      #scrollTopBtn {
+        display: none; /* 初期状態では非表示 */
+        position: fixed; /* 画面に固定 */
+        bottom: 20px;
+        right: 30px;
+        z-index: 99;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        outline: none;
+        background-color: #007bff; /* 色をハッキリした青に変更 */
+        color: white;
+        cursor: pointer;
+        padding: 12px 15px;
+        border-radius: 50%; /* 円形にする */
+        opacity: 0.9; /* 少し濃くする */
+        transition: opacity 0.3s, background-color 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* 影を追加 */
+      }
+      
+      #scrollTopBtn:hover {
+        background-color: #0056b3; /* ホバー時の色を濃い青に変更 */
+        opacity: 1;
+      }
+      /* ▲▲▲ ここまで修正 ▲▲▲ */"""
+
+try:
+    # 0. Check if file exists
+    if not os.path.exists(filename):
+        print(f"Error: File '{filename}' not found.", file=sys.stderr)
+        sys.exit(1)
+        
+    # 1. Backup the original file
+    shutil.copyfile(filename, backup_filename)
+    print(f"Backed up original file to {backup_filename}")
+
+    # 2. Read the original file
+    content = ""
+    with open(filename, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # 3. Perform replacement
+    if find_str in content:
+        modified_content = content.replace(find_str, replace_str)
+        
+        # 4. Overwrite the file with modified content
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(modified_content)
+        
+        print("Replacement complete: Updated the scroll button style to be more visible.")
+    else:
+        print("Target string not found (Maybe already fixed?). No changes made.")
+        # No changes, remove backup
+        os.remove(backup_filename)
+        print("Removed backup file as no changes were made.")
+
+except Exception as e:
+    print(f"An error occurred: {e}", file=sys.stderr)
+    print(f"Process interrupted. To restore, use {backup_filename}.")
+    sys.exit(1)
+手順2: Pythonスクリプトの実行 今作成した fix_button_style.py を実行してください。
+
+Bash
+
+python fix_button_style.py
+手順3: 後片付け スクリプトの実行が成功したら（"Replacement complete." と表示されたら）、作業ディレクトリにある以下の2つのファイルを削除してください。
+
+fix_button_style.py
+
+00_image_gallery.html.bak

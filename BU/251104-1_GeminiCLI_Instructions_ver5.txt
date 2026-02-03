@@ -1,0 +1,70 @@
+###GeminiCLIへの指示書（クリーンアップ＆再構築・最終版）
+
+**【実行タスク】**
+`00_image_gallery.html` ファイルが現在、重複した「08_10月データ」セクションや不完全なリスト、壊れたHTML構造（`</body>` タグの重複など）を含んでいる問題を**完全に修正**します。
+そのために、以下の処理を**すべて実行する**単一のPythonスクリプトを生成・実行してください。
+
+1.  **（掃除）** `00_image_gallery.html` から、`</body>` と `</html>` タグ、および「08_10月データ」に関するセクションを**すべて削除**し、クリーンな状態に戻します。
+2.  **（生成）** `08_10月データ/00_file_list.txt` を読み込み、**415ファイルすべて**を**正しい順序**で並べた、完全な「08_10月データ」のHTMLコードを1から生成します。
+3.  **（挿入）** 掃除したHTMLの末尾に、新しく生成したHTMLコードと、正しい `</body></html>` タグを挿入します。
+
+**【入力ファイル】**
+1.  `08_10月データ/00_file_list.txt`（画像リスト）
+2.  `00_image_gallery.html`（修正対象のHTMLファイル）
+
+**【厳守するルール】**
+1.  **AIは巨大ファイルを直接読み込まない:** `00_image_gallery.html` の内容はAIのコンテキスト（チャット履歴）に読み込まず、すべての編集はPythonスクリプトに任せてください。
+2.  **確実なクリーンアップ:** スクリプトは、`re.sub` を使用して、既存の「08_10月データ」セクション（`<button>`から`</div>`まで）と、ファイル内のすべての `</body>` `</html>` タグを**問答無用で削除**してください。
+3.  **正しいソート順:** HTML生成時、各グループ（例: `f-28028`）内で、まず `_01`〜`_05.webp` で終わるファイルを数字順に並べ、**その後に** `_1_2.webp` や `_15_1.webp` などの残りのファイルをアルファベット順に並べてください。
+4.  **正しい画像タグ:** 生成する `<img>` タグは、`src`, `alt`, `onclick="openModal(this)"` をすべて含んでください。
+
+**【実行ステップ】**
+1.  `clean_and_rebuild.py` という名前で、以下の機能を持つPythonスクリプトを**新規に作成**してください。
+    * スクリプトは `import re`, `import os`, `from collections import defaultdict` をインポートします。
+    * **定数の定義:**
+        * `LIST_FILE_PATH = '08_10月データ/00_file_list.txt'`
+        * `TARGET_HTML_FILE = '00_image_gallery.html'`
+        * `HTML_DIR_PREFIX = '08_10月データ/'`
+        * `ACCORDION_NAME = '08_10月データ'`
+    * **HTML生成ロジック (def generate_html_block):**
+        * `LIST_FILE_PATH` を読み込み、ファイル名のリストを取得します。
+        * ファイル名をプレフィックス（`_` より前の部分）でグループ化（`defaultdict(list)` を使用）します。
+        * **（重要）** HTMLの文字列 `html_output = []` を準備します。
+        * `html_output.append(f'<button class="accordion">{ACCORDION_NAME}</button>')`
+        * `html_output.append('<div class="panel">')`
+        * **（重要）** グループのキー（プレフィックス）を `sorted()` でアルファベット順にループ処理します。
+        * 各グループ内で、`priority_files = []` と `other_files = []` の2つのリストを作成します。
+        * ファイル名が `_01.webp`〜`_05.webp` のパターンに一致するか `re.search()` で確認します。
+        * 一致すれば `priority_files` に `(番号, ファイル名)` のタプルとして追加します。
+        * 一致しなければ `other_files` に追加します。
+        * `sorted_priority = [f_name for num, f_name in sorted(priority_files)]` で優先ファイルを `_01`〜`_05` の順にソートします。
+        * `sorted_other = sorted(other_files)` でその他ファイルをアルファベット順にソートします。
+        * `sorted_group_files = sorted_priority + sorted_other` で2つのリストを連結します。
+        * `sorted_group_files` を5個ずつのチャンクにスライス（`for i in range(0, len(sorted_group_files), 5):`）します。
+        * 各チャンクで `<div class="image-row">` を開始します。
+        * チャンク内の各ファイルで `<img src="{img_path}" alt="{img_file}" onclick="openModal(this)">` タグを生成します。（パスとaltを正しく設定すること）
+        * `<div class="image-row">` を閉じます。
+        * `html_output.append('</div>')` で `<div class="panel">` を閉じます。
+        * 最終的なHTMLブロック（`"\n".join(html_output)`）を返します。
+    * **ファイル編集ロジック (def main):**
+        * `new_html_content = generate_html_block()` （上記関数を呼び出す）
+        * `with open(TARGET_HTML_FILE, 'r', encoding='utf-8') as f: original_html = f.read()`
+        * **（重要）クリーンアップ処理:**
+            * `button_pattern = re.escape(f'<button class="accordion">{ACCORDION_NAME}</button>')`
+            * `panel_pattern = r'\s*<div class="panel">.*?</div>'`
+            * `full_pattern = button_pattern + panel_pattern`
+            * `cleaned_html = re.sub(full_pattern, '', original_html, flags=re.DOTALL)` （既存の「08_10月データ」をすべて削除）
+            * `cleaned_html = cleaned_html.replace("</body>", "").replace("</html>", "")` （すべての`body` `html` 閉じタグを削除）
+        * **（重要）挿入処理:**
+            * `final_content = cleaned_html.strip()` （末尾の空白などを削除）
+            * `final_content += "\n" + new_html_content` （新HTMLを追記）
+            * `final_content += "\n</body>\n</html>\n"` （正しい閉じタグを末尾に**1回だけ**追加）
+        * `with open(TARGET_HTML_FILE, 'w', encoding='utf-8') as f: f.write(final_content)`
+        * `print(f"「{ACCORDION_NAME}」セクションの完全なクリーンアップと再構築が完了しました。")`
+2.  作成した `clean_and_rebuild.py` を**実行**します。
+3.  スクリプトの出力（「完全なクリーンアップと再構築が完了しました。」）を確認します。
+4.  一時ファイル `clean_and_rebuild.py` を**削除**します。
+5.  「すべての作業が完了しました。」と報告してください。
+
+**【タスクの完遂】**
+この指示書のタスクを忠実に完遂してください。
