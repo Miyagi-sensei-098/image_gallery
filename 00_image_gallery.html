@@ -251,7 +251,7 @@
   <body>
     <div class="search-container">
       <div class="search-input-wrapper">
-        <input type="text" id="imageSearchInput" placeholder="画像ファイル名で検索（例: A-09003）" />
+        <input type="text" id="imageSearchInput" placeholder="画像ファイル名または画像内のテキストで検索" />
         <button id="searchClearBtn" type="button">✕</button>
       </div>
       <div id="searchResultInfo"></div>
@@ -876,10 +876,26 @@
 
           // 各画像をチェック
           allImages.forEach(function (img) {
-            var src = img.getAttribute('src').toLowerCase()
-            var alt = img.getAttribute('alt').toLowerCase()
+            var src = decodeURIComponent(img.getAttribute('src')).toLowerCase()
+            var alt = decodeURIComponent(img.getAttribute('alt')).toLowerCase()
 
-            if (src.includes(query) || alt.includes(query)) {
+            var isMatch = src.includes(query) || alt.includes(query)
+
+            // OCRデータがある場合はテキスト検索も行う
+            if (!isMatch && typeof OCR_DATA !== 'undefined') {
+              // src属性値をデコードしてキーとする (日本語ファイル名対応)
+              try {
+                var key = decodeURIComponent(img.getAttribute('src'))
+                // Windowsパスのバックスラッシュ対策などは生成時に統一している前提
+                if (OCR_DATA[key] && OCR_DATA[key].toLowerCase().includes(query)) {
+                  isMatch = true
+                }
+              } catch (e) {
+                console.error('OCR lookup error:', e)
+              }
+            }
+
+            if (isMatch) {
               img.classList.remove('hidden')
               matchCount++
 
@@ -9085,5 +9101,6 @@
   <img src="11_01月データ/g-28062_g-28062.webp" alt="g-28062_g-28062.webp" onclick="openModal(this)" loading="lazy" />
 </div>
 </div>
+<script src='ocr_data.js'></script>
 </body>
 </html>
