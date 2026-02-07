@@ -80,7 +80,17 @@ def main():
                 with Image.open(f_path) as img:
                     img_np = np.array(img.convert('RGB'))
                 
-                result = reader.readtext(img_np, detail=0, mag_ratio=2.0, beamWidth=10)
+                result = reader.readtext(
+                    img_np, 
+                    detail=0, 
+                    mag_ratio=3.0, 
+                    beamWidth=20, 
+                    rotation_info=[90, 180, 270],
+                    text_threshold=0.5, 
+                    low_text=0.3, 
+                    contrast_ths=0.1, 
+                    adjust_contrast=0.5
+                )
                 # Join text and also include the filename in the search text
                 # Normalize text to lower case for case-insensitive search logic might be handled in JS, 
                 # but storing raw text is better.
