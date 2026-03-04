@@ -4,6 +4,8 @@ import easyocr
 import glob
 from PIL import Image
 import numpy as np
+import psutil
+import torch
 
 # Configuration
 ROOT_DIR = '.'  # Current directory
@@ -40,6 +42,12 @@ def save_data(data, filepath):
 
 def main():
     print("Initializing EasyOCR reader...")
+    # Get total logical cores and use all of them
+    total_cores = psutil.cpu_count(logical=True)
+    target_threads = max(1, total_cores)
+    print(f"Using full CPU power: configuring torch.set_num_threads({target_threads}) ({total_cores} total logical cores)")
+    torch.set_num_threads(target_threads)
+    
     # gpu=True if CUDA is available, else False. EasyOCR handles this automatically usually.
     reader = easyocr.Reader(LANGUAGES)
     
