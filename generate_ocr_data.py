@@ -6,11 +6,15 @@ from PIL import Image
 import numpy as np
 import psutil
 import torch
+import logging
+from manga_ocr import MangaOcr
 
 # Configuration
 ROOT_DIR = '.'  # Current directory
 OUTPUT_FILE = 'ocr_data.js'
-LANGUAGES = ['ja', 'en']
+
+# Set logging levels to reduce noise
+logging.getLogger("manga_ocr").setLevel(logging.WARNING)
 
 def load_existing_data(filepath):
     """Loads existing OCR data from the JS file if it exists."""
@@ -21,7 +25,6 @@ def load_existing_data(filepath):
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
             # Expecting format: const OCR_DATA = { ... };
-            # We strip the prefix and suffix to parse JSON
             prefix = 'const OCR_DATA = '
             suffix = ';'
             if content.startswith(prefix):
@@ -41,28 +44,27 @@ def save_data(data, filepath):
     print(f"Saved progress to {filepath}")
 
 def main():
-    print("Initializing EasyOCR reader...")
+    print("Initializing OCR engines...")
     # Get total logical cores and use all of them
     total_cores = psutil.cpu_count(logical=True)
     target_threads = max(1, total_cores)
-    print(f"Using full CPU power: configuring torch.set_num_threads({target_threads}) ({total_cores} total logical cores)")
+    print(f"Configuring CPU resources: torch.set_num_threads({target_threads})")
     torch.set_num_threads(target_threads)
     
-    # gpu=True if CUDA is available, else False. EasyOCR handles this automatically usually.
-    reader = easyocr.Reader(LANGUAGES)
+    # Initialize EasyOCR (primarily for text detection)
+    reader = easyocr.Reader(['ja', 'en'])
+    # Initialize MangaOCR (for high-accuracy Japanese recognition, including vertical text)
+    mocr = MangaOcr()
     
     existing_data = load_existing_data(OUTPUT_FILE)
     print(f"Loaded {len(existing_data)} entries from existing database.")
     
     # Find all webp files recursively
-    # Windows path separator might be backslash, but web use forward slash.
-    # We'll normalize paths to forward slashes for the JS key.
     all_files = glob.glob('**/*.webp', recursive=True)
     
     # Filter files that need processing
     files_to_process = []
     for f_path in all_files:
-        # Normalize path to standard forward slash relative to root
         rel_path = f_path.replace(os.sep, '/')
         if rel_path not in existing_data:
             files_to_process.append((f_path, rel_path))
@@ -75,34 +77,55 @@ def main():
         return
 
     processed_count = 0
-    save_interval = 20 # Save every 20 images
+    save_interval = 10 # Save every 10 images
     
     try:
         for f_path, rel_path in files_to_process:
             print(f"Processing ({processed_count + 1}/{total_new}): {rel_path}")
             
             try:
-                # Detail=0 for simple text output
-                # Fix for Japanese paths on Windows: Read with PIL and convert to numpy
-                # OpenCV (used by easyocr) often fails with non-ASCII paths on Windows
                 with Image.open(f_path) as img:
-                    img_np = np.array(img.convert('RGB'))
+                    img_rgb = img.convert('RGB')
+                    img_np = np.array(img_rgb)
                 
-                result = reader.readtext(
+                # Step 1: Detect text regions using EasyOCR
+                # Increase mag_ratio and lower thresholds to pick up smaller/fainter text
+                results = reader.readtext(
                     img_np, 
-                    detail=0, 
-                    mag_ratio=3.0, 
-                    beamWidth=20, 
-                    rotation_info=[90, 180, 270],
-                    text_threshold=0.5, 
+                    paragraph=False, 
+                    mag_ratio=2.5, 
+                    text_threshold=0.4, 
                     low_text=0.3, 
-                    contrast_ths=0.1, 
-                    adjust_contrast=0.5
+                    min_size=2
                 )
+                
+                texts = []
+                for (bbox, _, _) in results:
+                    # Step 2: For each detected region, use Manga-OCR for recognition
+                    # bbox is [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
+                    x_coords = [p[0] for p in bbox]
+                    y_coords = [p[1] for p in bbox]
+                    
+                    x_min, x_max = max(0, int(min(x_coords))), int(max(x_coords))
+                    y_min, y_max = max(0, int(min(y_coords))), int(max(y_coords))
+                    
+                    # Add a small padding (5px) for better Manga-OCR accuracy
+                    padding = 5
+                    width, height = img_rgb.size
+                    x_min = max(0, x_min - padding)
+                    y_min = max(0, y_min - padding)
+                    x_max = min(width, x_max + padding)
+                    y_max = min(height, y_max + padding)
+                    
+                    # Crop and recognize
+                    if x_max > x_min and y_max > y_min:
+                        crop = img_rgb.crop((x_min, y_min, x_max, y_max))
+                        text = mocr(crop)
+                        if text:
+                            texts.append(text)
+                
                 # Join text and also include the filename in the search text
-                # Normalize text to lower case for case-insensitive search logic might be handled in JS, 
-                # but storing raw text is better.
-                full_text = " ".join(result) + " " + os.path.basename(f_path)
+                full_text = " ".join(texts) + " " + os.path.basename(f_path)
                 existing_data[rel_path] = full_text
                 
                 processed_count += 1
