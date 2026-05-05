@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import glob; files=glob.glob\\('13_03月データ/**/*.webp', recursive=True\\) + glob.glob\\('13_03月データ/*.webp'\\); print\\(f'13_03月データ 画像数: {len\\(files\\)}'\\)\")",
+      "Bash(python -c ':*)",
+      "Bash(python generate_ocr_data.py)",
+      "Bash(pip list:*)",
+      "Bash(.venv/Scripts/python.exe generate_ocr_data.py)",
+      "Bash(tasklist)",
+      "Bash(git restore *)"
+    ]
+  }
+}
