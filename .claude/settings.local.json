@@ -7,7 +7,10 @@
       "Bash(pip list:*)",
       "Bash(.venv/Scripts/python.exe generate_ocr_data.py)",
       "Bash(tasklist)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(CUDA_LAUNCH_BLOCKING=1 .venv/Scripts/python.exe generate_ocr_data.py)",
+      "Bash(CUDA_VISIBLE_DEVICES=\"\" .venv/Scripts/python.exe -c \"import torch; print\\('torch OK, CUDA:', torch.cuda.is_available\\(\\)\\)\")"
     ]
   }
 }
