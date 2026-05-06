@@ -51,10 +51,10 @@ def main():
     print(f"Configuring CPU resources: torch.set_num_threads({target_threads})")
     torch.set_num_threads(target_threads)
     
-    # Initialize EasyOCR (primarily for text detection)
-    reader = easyocr.Reader(['ja', 'en'])
-    # Initialize MangaOCR (for high-accuracy Japanese recognition, including vertical text)
-    mocr = MangaOcr()
+    # Initialize EasyOCR on GPU
+    reader = easyocr.Reader(['ja', 'en'], gpu=True)
+    # Initialize MangaOCR on GPU
+    mocr = MangaOcr(force_cpu=False)
     
     existing_data = load_existing_data(OUTPUT_FILE)
     print(f"Loaded {len(existing_data)} entries from existing database.")
@@ -87,52 +87,54 @@ def main():
                 with Image.open(f_path) as img:
                     img_rgb = img.convert('RGB')
                     img_np = np.array(img_rgb)
-                
-                # Step 1: Detect text regions using EasyOCR
-                # Increase mag_ratio and lower thresholds to pick up smaller/fainter text
-                results = reader.readtext(
-                    img_np, 
-                    paragraph=False, 
-                    mag_ratio=2.5, 
-                    text_threshold=0.4, 
-                    low_text=0.3, 
-                    min_size=2
-                )
-                
+
+                def run_easyocr(mag, canvas):
+                    return reader.readtext(
+                        img_np,
+                        paragraph=False,
+                        mag_ratio=mag,
+                        canvas_size=canvas,
+                        text_threshold=0.4,
+                        low_text=0.3,
+                        min_size=2
+                    )
+
+                try:
+                    results = run_easyocr(2.5, 2560)
+                except torch.cuda.OutOfMemoryError:
+                    torch.cuda.empty_cache()
+                    print(f"  OOM at mag_ratio=2.5, retrying with 1.5...")
+                    results = run_easyocr(1.5, 2000)
+
                 texts = []
                 for (bbox, _, _) in results:
-                    # Step 2: For each detected region, use Manga-OCR for recognition
-                    # bbox is [[x1,y1],[x2,y2],[x3,y3],[x4,y4]]
                     x_coords = [p[0] for p in bbox]
                     y_coords = [p[1] for p in bbox]
-                    
+
                     x_min, x_max = max(0, int(min(x_coords))), int(max(x_coords))
                     y_min, y_max = max(0, int(min(y_coords))), int(max(y_coords))
-                    
-                    # Add a small padding (5px) for better Manga-OCR accuracy
+
                     padding = 5
                     width, height = img_rgb.size
                     x_min = max(0, x_min - padding)
                     y_min = max(0, y_min - padding)
                     x_max = min(width, x_max + padding)
                     y_max = min(height, y_max + padding)
-                    
-                    # Crop and recognize
+
                     if x_max > x_min and y_max > y_min:
                         crop = img_rgb.crop((x_min, y_min, x_max, y_max))
                         text = mocr(crop)
                         if text:
                             texts.append(text)
-                
-                # Join text and also include the filename in the search text
+
                 full_text = " ".join(texts) + " " + os.path.basename(f_path)
                 existing_data[rel_path] = full_text
-                
+
                 processed_count += 1
-                
+
                 if processed_count % save_interval == 0:
                     save_data(existing_data, OUTPUT_FILE)
-                    
+
             except Exception as e:
                 print(f"Error processing {f_path}: {e}")
                 
