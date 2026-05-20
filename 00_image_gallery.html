@@ -1111,10 +1111,14 @@
     };
 
     document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (modal.style.display === 'flex') closeModal();
+        else if (stockOverlay.classList.contains('open')) closeStockOverlay();
+        return;
+      }
       if (modal.style.display !== 'flex') return;
       if (e.key === 'ArrowLeft') modalPrev();
       else if (e.key === 'ArrowRight') modalNext();
-      else if (e.key === 'Escape') closeModal();
       else if (e.key === 'Enter') { e.preventDefault(); if (currentModalSrc) StockManager.toggle(currentModalSrc); }
     });
 
