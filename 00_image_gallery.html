@@ -220,22 +220,194 @@
       width: 100%;
       margin-bottom: 5px;
     }
-    .image-row img {
+    .image-row .thumb {
       flex: 0 0 20%;
       width: 20%;
+      padding: 2px;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .image-row .thumb img {
+      width: 100%;
       height: auto;
       object-fit: cover;
-      padding: 2px;
       cursor: pointer;
       transition: transform 0.2s;
+      display: block;
     }
-    .image-row img:hover {
+    .image-row .thumb:hover img {
       transform: scale(1.05);
     }
     .image-row.hidden { display: none; }
-    .image-row img.hidden { display: none; }
+    .image-row .thumb.hidden { display: none; }
     .panel.search-active { display: block !important; }
     .accordion.search-active { background-color: #ffffe0; }
+
+    /* === Stock Button (on each thumb) === */
+    .stock-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      min-width: 28px;
+      min-height: 28px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+      opacity: 1;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-row .thumb:hover .stock-btn {
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      transform: scale(1.05);
+    }
+    .image-row .thumb.stocked {
+      box-shadow: inset 0 0 0 3px #ffb300;
+    }
+    .image-row .thumb.stocked .stock-btn {
+      background: #ffb300;
+      color: #000;
+    }
+
+    /* === Stock Counter Button (bottom-right fixed) === */
+    #stockCounterBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 30px;
+      z-index: 99;
+      padding: 0 16px;
+      height: 50px;
+      min-width: 120px;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      outline: none;
+      background-color: #ffb300;
+      color: #000;
+      cursor: pointer;
+      border-radius: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.2s, transform 0.15s;
+    }
+    #stockCounterBtn:hover {
+      background-color: #ffa000;
+      transform: translateY(-2px);
+    }
+    #stockCounterBtn.empty {
+      background-color: #bbb;
+      color: #fff;
+    }
+
+    /* === Stock Overlay === */
+    #stockOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 20, 30, 0.96);
+      z-index: 90;
+      flex-direction: column;
+    }
+    #stockOverlay.open { display: flex; }
+    .stock-overlay-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: #1a1a2e;
+      color: #fff;
+      border-bottom: 1px solid #333;
+      flex-shrink: 0;
+    }
+    .stock-overlay-title {
+      font-size: 16px;
+      font-weight: bold;
+      flex: 1;
+    }
+    .stock-overlay-header button {
+      padding: 8px 16px;
+      font-size: 13px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #2a2a40;
+      color: #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .stock-overlay-header button:hover {
+      background: #3a3a55;
+    }
+    .stock-overlay-header .clear-all-btn {
+      background: #c0392b;
+      border-color: #c0392b;
+      color: #fff;
+    }
+    .stock-overlay-header .clear-all-btn:hover {
+      background: #a93226;
+    }
+    .stock-overlay-header .close-btn {
+      font-size: 18px;
+      padding: 6px 14px;
+    }
+    .stock-overlay-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .stock-cell {
+      position: relative;
+      background: #2a2a40;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .stock-cell img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: pointer;
+    }
+    .stock-empty {
+      text-align: center;
+      color: #aaa;
+      padding: 60px 20px;
+      font-size: 14px;
+    }
+    .stock-cell-caption {
+      font-size: 11px;
+      color: #ccc;
+      padding: 4px 6px;
+      word-break: break-all;
+    }
+
+    /* === Modal Stock Toggle Button === */
+    #modalStockBtn {
+      padding: 5px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #f1f1f1;
+      border: none;
+      border-radius: 3px;
+      color: #333;
+      margin: 5px;
+    }
+    #modalStockBtn:hover { background-color: #ddd; }
+    #modalStockBtn.stocked {
+      background-color: #ffb300;
+      color: #000;
+    }
 
     /* === Modal === */
     .modal {
@@ -302,7 +474,7 @@
     #scrollTopBtn {
       display: none;
       position: fixed;
-      bottom: 20px;
+      bottom: 80px;
       right: 30px;
       z-index: 99;
       font-size: 20px;
@@ -402,9 +574,23 @@
         <span id="modalCounter" style="color:#888;font-size:13px;"></span>
         <button id="copyFilenameBtn">ファイル名をコピー</button>
         <button id="copyPrefixBtn">プレフィックスをコピー</button>
+        <button id="modalStockBtn" type="button">&#9734; ストック</button>
       </div>
     </div>
   </div>
+
+  <!-- Stock Overlay -->
+  <div id="stockOverlay">
+    <div class="stock-overlay-header">
+      <span class="stock-overlay-title" id="stockOverlayTitle">ストック一覧</span>
+      <button type="button" class="clear-all-btn" id="stockClearAllBtn">全解除</button>
+      <button type="button" class="close-btn" id="stockCloseBtn">閉じる</button>
+    </div>
+    <div class="stock-overlay-body" id="stockOverlayBody"></div>
+  </div>
+
+  <!-- Stock Counter (bottom-right floating) -->
+  <button id="stockCounterBtn" type="button">&#9734; ストック 0 件</button>
 
   <!-- Scroll Top -->
   <button id="scrollTopBtn" onclick="scrollToTop()">&#9650;</button>
@@ -518,6 +704,20 @@
     }
 
     // === Render Section Images ===
+    function escapeAttr(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function thumbHTML(src) {
+      var alt = src.split('/').pop();
+      var srcAttr = escapeAttr(src);
+      var altAttr = escapeAttr(alt);
+      return '<div class="thumb" data-src="' + srcAttr + '">' +
+        '<img src="' + srcAttr + '" alt="' + altAttr + '" loading="lazy" onclick="openModal(this)" />' +
+        '<button class="stock-btn" type="button" aria-label="ストック">&#9734;</button>' +
+        '</div>';
+    }
+
     function renderSection(num, data) {
       var panel = sectionPanels[num];
       var html = '';
@@ -544,8 +744,7 @@
         if (mainImages.length > 0) {
           html += '<div class="image-row">';
           mainImages.forEach(function(src) {
-            var alt = src.split('/').pop();
-            html += '<img src="' + src + '" alt="' + alt + '" loading="lazy" onclick="openModal(this)" />';
+            html += thumbHTML(src);
           });
           html += '</div>';
         }
@@ -554,14 +753,14 @@
         if (extraImages.length > 0) {
           html += '<div class="image-row">';
           extraImages.forEach(function(src) {
-            var alt = src.split('/').pop();
-            html += '<img src="' + src + '" alt="' + alt + '" loading="lazy" onclick="openModal(this)" />';
+            html += thumbHTML(src);
           });
           html += '</div>';
         }
       });
 
       panel.innerHTML = html;
+      StockManager.applyToPanel(panel);
     }
 
     // === Accordion Behavior ===
@@ -648,20 +847,34 @@
     var copyPrefixBtn = document.getElementById('copyPrefixBtn');
     var modalPrevBtn = document.getElementById('modalPrevBtn');
     var modalNextBtn = document.getElementById('modalNextBtn');
+    var modalStockBtn = document.getElementById('modalStockBtn');
     var isCopyingFilename = false;
     var isCopyingPrefix = false;
+    var currentModalSrc = '';
 
     var modalImages = [];
     var modalCurrentIndex = -1;
+
+    function getOriginalSrc(elem) {
+      var container = elem.closest && (elem.closest('.thumb') || elem.closest('.stock-cell'));
+      if (container) return container.getAttribute('data-src') || '';
+      try {
+        return decodeURIComponent(elem.getAttribute('src') || '');
+      } catch (e) {
+        return elem.getAttribute('src') || '';
+      }
+    }
 
     function updateModalDisplay(index) {
       var elem = modalImages[index];
       var filename = elem.alt;
       modalImg.src = elem.src;
+      currentModalSrc = getOriginalSrc(elem);
       captionText.innerHTML = filename;
       modalCounter.textContent = (index + 1) + ' / ' + modalImages.length;
       modalPrevBtn.disabled = index <= 0;
       modalNextBtn.disabled = index >= modalImages.length - 1;
+      updateModalStockBtn();
 
       var originalFilenameBtnText = 'ファイル名をコピー';
       var originalPrefixBtnText = 'プレフィックスをコピー';
@@ -701,12 +914,19 @@
       };
     }
 
-    window.openModal = function(elem) {
-      var panel = elem.closest('.panel');
-      modalImages = panel
-        ? Array.from(panel.querySelectorAll('img:not(.hidden)'))
-        : [elem];
+    window.openModal = function(elem, customList) {
+      if (customList && customList.length) {
+        modalImages = customList;
+      } else {
+        var panel = elem.closest('.panel');
+        if (panel) {
+          modalImages = Array.from(panel.querySelectorAll('.thumb:not(.hidden) img'));
+        } else {
+          modalImages = [elem];
+        }
+      }
       modalCurrentIndex = modalImages.indexOf(elem);
+      if (modalCurrentIndex < 0) modalCurrentIndex = 0;
       modal.style.display = 'flex';
       updateModalDisplay(modalCurrentIndex);
     };
@@ -828,11 +1048,11 @@
       document.querySelectorAll('.panel.search-active').forEach(function(el) {
         el.classList.remove('search-active');
       });
-      // Unhide all images and rows in loaded sections
+      // Unhide all thumbs and rows in loaded sections
       document.querySelectorAll('.image-row.hidden').forEach(function(el) {
         el.classList.remove('hidden');
       });
-      document.querySelectorAll('.image-row img.hidden').forEach(function(el) {
+      document.querySelectorAll('.image-row .thumb.hidden').forEach(function(el) {
         el.classList.remove('hidden');
       });
     }
@@ -915,19 +1135,19 @@
         if (panel) panel.classList.add('search-active');
       });
 
-      // Filter images in loaded panels
+      // Filter thumbs in loaded panels
       var matchSrcSet = new Set(allMatches.map(function(m) { return m.src; }));
 
-      document.querySelectorAll('.panel img').forEach(function(img) {
-        var src = decodeURIComponent(img.getAttribute('src'));
+      document.querySelectorAll('.panel .thumb').forEach(function(thumb) {
+        var src = decodeURIComponent(thumb.getAttribute('data-src') || '');
         if (!matchSrcSet.has(src)) {
-          img.classList.add('hidden');
+          thumb.classList.add('hidden');
         }
       });
 
-      // Hide rows with all images hidden
+      // Hide rows with all thumbs hidden
       document.querySelectorAll('.image-row').forEach(function(row) {
-        var visible = row.querySelectorAll('img:not(.hidden)');
+        var visible = row.querySelectorAll('.thumb:not(.hidden)');
         if (visible.length === 0) {
           row.classList.add('hidden');
         }
@@ -1031,15 +1251,15 @@
       });
 
       // Filter loaded panels
-      document.querySelectorAll('.panel img').forEach(function(img) {
-        var src = decodeURIComponent(img.getAttribute('src'));
+      document.querySelectorAll('.panel .thumb').forEach(function(thumb) {
+        var src = decodeURIComponent(thumb.getAttribute('data-src') || '');
         if (!matchSrcSet.has(src)) {
-          img.classList.add('hidden');
+          thumb.classList.add('hidden');
         }
       });
 
       document.querySelectorAll('.image-row').forEach(function(row) {
-        var visible = row.querySelectorAll('img:not(.hidden)');
+        var visible = row.querySelectorAll('.thumb:not(.hidden)');
         if (visible.length === 0) {
           row.classList.add('hidden');
         }
@@ -1049,14 +1269,14 @@
     function filterPanelImages(num, matchSrcSet) {
       var panel = sectionPanels[num];
       if (!panel) return;
-      panel.querySelectorAll('img').forEach(function(img) {
-        var src = decodeURIComponent(img.getAttribute('src'));
+      panel.querySelectorAll('.thumb').forEach(function(thumb) {
+        var src = decodeURIComponent(thumb.getAttribute('data-src') || '');
         if (!matchSrcSet.has(src)) {
-          img.classList.add('hidden');
+          thumb.classList.add('hidden');
         }
       });
       panel.querySelectorAll('.image-row').forEach(function(row) {
-        var visible = row.querySelectorAll('img:not(.hidden)');
+        var visible = row.querySelectorAll('.thumb:not(.hidden)');
         if (visible.length === 0) {
           row.classList.add('hidden');
         }
@@ -1098,12 +1318,218 @@
       });
     };
 
+    // === Stock Manager ===
+    var StockManager = (function() {
+      var STORAGE_KEY = 'gallery.stockedSrcs';
+      var stockSet = new Set();
+      var stockOrder = [];
+
+      function load() {
+        try {
+          var raw = sessionStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          var arr = JSON.parse(raw);
+          if (Array.isArray(arr)) {
+            arr.forEach(function(s) {
+              if (typeof s === 'string' && !stockSet.has(s)) {
+                stockSet.add(s);
+                stockOrder.push(s);
+              }
+            });
+          }
+        } catch (e) { /* ignore corrupt storage */ }
+      }
+
+      function persist() {
+        try {
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stockOrder));
+        } catch (e) { /* quota exceeded — fail silently */ }
+      }
+
+      function notify() {
+        updateCounterBtn();
+        // Reflect on every visible thumb across panels
+        document.querySelectorAll('.thumb').forEach(function(thumb) {
+          var src = thumb.getAttribute('data-src');
+          if (stockSet.has(src)) {
+            thumb.classList.add('stocked');
+            var btn = thumb.querySelector('.stock-btn');
+            if (btn) btn.innerHTML = '&#9733;';
+          } else {
+            thumb.classList.remove('stocked');
+            var btn2 = thumb.querySelector('.stock-btn');
+            if (btn2) btn2.innerHTML = '&#9734;';
+          }
+        });
+        updateModalStockBtn();
+        // If overlay is open, re-render it
+        if (stockOverlay.classList.contains('open')) {
+          renderStockOverlay();
+        }
+      }
+
+      return {
+        has: function(src) { return stockSet.has(src); },
+        size: function() { return stockOrder.length; },
+        list: function() { return stockOrder.slice(); },
+        add: function(src) {
+          if (stockSet.has(src)) return;
+          stockSet.add(src);
+          stockOrder.push(src);
+          persist();
+          notify();
+        },
+        remove: function(src) {
+          if (!stockSet.has(src)) return;
+          stockSet.delete(src);
+          var idx = stockOrder.indexOf(src);
+          if (idx >= 0) stockOrder.splice(idx, 1);
+          persist();
+          notify();
+        },
+        toggle: function(src) {
+          if (stockSet.has(src)) {
+            this.remove(src);
+          } else {
+            this.add(src);
+          }
+        },
+        clear: function() {
+          stockSet.clear();
+          stockOrder = [];
+          persist();
+          notify();
+        },
+        applyToPanel: function(panel) {
+          if (!panel) return;
+          panel.querySelectorAll('.thumb').forEach(function(thumb) {
+            var src = thumb.getAttribute('data-src');
+            if (stockSet.has(src)) {
+              thumb.classList.add('stocked');
+              var btn = thumb.querySelector('.stock-btn');
+              if (btn) btn.innerHTML = '&#9733;';
+            }
+          });
+        },
+        loadFromStorage: load
+      };
+    })();
+
+    // === Stock Counter Button ===
+    var stockCounterBtn = document.getElementById('stockCounterBtn');
+    function updateCounterBtn() {
+      var n = StockManager.size();
+      stockCounterBtn.innerHTML = (n > 0 ? '&#9733;' : '&#9734;') + ' ストック ' + n + ' 件';
+      if (n === 0) {
+        stockCounterBtn.classList.add('empty');
+      } else {
+        stockCounterBtn.classList.remove('empty');
+      }
+    }
+
+    // === Stock Overlay ===
+    var stockOverlay = document.getElementById('stockOverlay');
+    var stockOverlayBody = document.getElementById('stockOverlayBody');
+    var stockOverlayTitle = document.getElementById('stockOverlayTitle');
+
+    function renderStockOverlay() {
+      var list = StockManager.list();
+      stockOverlayTitle.textContent = 'ストック一覧（' + list.length + ' 件）';
+      if (list.length === 0) {
+        stockOverlayBody.innerHTML = '<div class="stock-empty">ストックされた画像はありません</div>';
+        return;
+      }
+      var html = '<div class="stock-grid">';
+      list.forEach(function(src) {
+        var alt = src.split('/').pop();
+        var srcAttr = escapeAttr(src);
+        var altAttr = escapeAttr(alt);
+        html += '<div class="stock-cell" data-src="' + srcAttr + '">' +
+          '<img src="' + srcAttr + '" alt="' + altAttr + '" loading="lazy" />' +
+          '<button class="stock-btn" type="button" aria-label="ストック解除">&#9733;</button>' +
+          '<div class="stock-cell-caption">' + altAttr + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+      stockOverlayBody.innerHTML = html;
+    }
+
+    function openStockOverlay() {
+      renderStockOverlay();
+      stockOverlay.classList.add('open');
+    }
+
+    function closeStockOverlay() {
+      stockOverlay.classList.remove('open');
+    }
+
+    stockCounterBtn.addEventListener('click', openStockOverlay);
+    document.getElementById('stockCloseBtn').addEventListener('click', closeStockOverlay);
+    document.getElementById('stockClearAllBtn').addEventListener('click', function() {
+      if (StockManager.size() === 0) return;
+      if (confirm('ストックを全て解除しますか？')) {
+        StockManager.clear();
+      }
+    });
+
+    // Overlay click handling: stock-btn removes, img opens modal
+    stockOverlayBody.addEventListener('click', function(e) {
+      var btn = e.target.closest('.stock-btn');
+      if (btn) {
+        var cell = btn.closest('.stock-cell');
+        if (cell) {
+          var src = cell.getAttribute('data-src');
+          StockManager.remove(src);
+        }
+        return;
+      }
+      var img = e.target.closest('.stock-cell img');
+      if (img) {
+        var cellImgs = Array.from(stockOverlayBody.querySelectorAll('.stock-cell img'));
+        window.openModal(img, cellImgs);
+      }
+    });
+
+    // === Modal Stock Button ===
+    function updateModalStockBtn() {
+      if (!currentModalSrc) {
+        modalStockBtn.innerHTML = '&#9734; ストック';
+        modalStockBtn.classList.remove('stocked');
+        return;
+      }
+      if (StockManager.has(currentModalSrc)) {
+        modalStockBtn.innerHTML = '&#9733; ストック済み';
+        modalStockBtn.classList.add('stocked');
+      } else {
+        modalStockBtn.innerHTML = '&#9734; ストック';
+        modalStockBtn.classList.remove('stocked');
+      }
+    }
+    modalStockBtn.addEventListener('click', function() {
+      if (!currentModalSrc) return;
+      StockManager.toggle(currentModalSrc);
+    });
+
+    // === Stock Button Event Delegation (gallery thumbs) ===
+    document.getElementById('galleryContainer').addEventListener('click', function(e) {
+      var btn = e.target.closest('.stock-btn');
+      if (!btn) return;
+      e.stopPropagation();
+      e.preventDefault();
+      var thumb = btn.closest('.thumb');
+      if (!thumb) return;
+      var src = thumb.getAttribute('data-src');
+      StockManager.toggle(src);
+    }, true);
+
     // === Init ===
     document.addEventListener('DOMContentLoaded', function() {
+      StockManager.loadFromStorage();
       buildGallery();
       initAccordions();
       initSidebar();
       initSearch();
+      updateCounterBtn();
 
       // Preload all section data (small JS files) for search completeness
       setTimeout(loadAllSectionsForSearch, 1000);
