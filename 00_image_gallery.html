@@ -433,6 +433,12 @@
       display: block;
       cursor: pointer;
     }
+    .stock-cell.stocked { outline: 3px solid #ffb300; }
+    .stock-cell.stocked .stock-btn {
+      background: #ffb300;
+      color: #000;
+      opacity: 1;
+    }
     .stock-empty {
       text-align: center;
       color: #aaa;
@@ -660,6 +666,58 @@
     .modal-prev { left: 12px; }
     .modal-next { right: 12px; }
 
+    /* === AND/OR Search Mode Toggle === */
+    .search-mode-toggle { display: flex; gap: 2px; flex-shrink: 0; }
+    .search-mode-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      color: #555;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .search-mode-btn.active { background: #0f3460; color: #fff; border-color: #0f3460; }
+    .search-mode-btn:not(.active):hover { background: #e0e0e0; }
+
+    /* === Section Filter Bar (inside search result overlay) === */
+    #sectionFilterBar {
+      display: none;
+      padding: 8px 16px;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      background: #16213e;
+      border-bottom: 1px solid #2a2a50;
+      flex-shrink: 0;
+    }
+    #sectionFilterBar.visible { display: flex; }
+    .section-filter-chip {
+      padding: 3px 10px;
+      font-size: 12px;
+      border: 1px solid #444;
+      border-radius: 12px;
+      background: #2a2a40;
+      color: #ccc;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .section-filter-chip.active { background: #3498db; color: #fff; border-color: #3498db; }
+    .section-filter-chip:not(.active):hover { background: #3a3a55; color: #fff; }
+
+    /* === Search Result Overlay === */
+    #searchResultOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 20, 30, 0.96);
+      z-index: 88;
+      flex-direction: column;
+    }
+    #searchResultOverlay.open { display: flex; }
+
     /* === Expand/Collapse All Buttons === */
     .accordion-controls {
       display: flex;
@@ -688,8 +746,12 @@
   <div class="main-content" id="mainContent">
     <div class="search-container">
       <div class="search-input-wrapper">
-        <input type="text" id="imageSearchInput" placeholder="画像ファイル名または画像内のテキストで検索" />
+        <input type="text" id="imageSearchInput" placeholder="画像ファイル名または画像内のテキストで検索" autocomplete="off" spellcheck="false" />
         <button id="searchClearBtn" type="button">&#10005;</button>
+      </div>
+      <div class="search-mode-toggle">
+        <button id="searchModeAnd" class="search-mode-btn active">AND</button>
+        <button id="searchModeOr"  class="search-mode-btn">OR</button>
       </div>
       <div class="accordion-controls">
         <button onclick="expandAll()">全て開く</button>
@@ -720,6 +782,16 @@
         <button id="viewSiblingSetBtn" type="button">このセットを見る</button>
       </div>
     </div>
+  </div>
+
+  <!-- Search Result Overlay -->
+  <div id="searchResultOverlay">
+    <div class="stock-overlay-header">
+      <span class="stock-overlay-title" id="searchResultOverlayTitle">検索結果</span>
+      <button type="button" class="close-btn" id="searchResultOverlayCloseBtn">閉じる</button>
+    </div>
+    <div id="sectionFilterBar"></div>
+    <div class="stock-overlay-body" id="searchResultOverlayBody"></div>
   </div>
 
   <!-- Stock Overlay -->
@@ -755,6 +827,9 @@
     var ocrLoaded = false;
     var ocrLoading = false;
     var searchWorker = null;
+    var searchMode = 'and';
+    var lastSearchMatches = [];
+    var overlayFilteredSections = new Set(); // 空 = すべて表示
 
     // === Build Sidebar + Accordion from Index ===
     function buildGallery() {
@@ -1114,6 +1189,7 @@
       if (e.key === 'Escape') {
         if (modal.style.display === 'flex') closeModal();
         else if (stockOverlay.classList.contains('open')) closeStockOverlay();
+        else if (document.getElementById('searchResultOverlay').classList.contains('open')) closeSearchResultOverlay();
         return;
       }
       if (modal.style.display !== 'flex') return;
@@ -1151,6 +1227,165 @@
     };
 
     // === Search ===
+    // === Search Result Info & Overlay ===
+    function updateSearchResultInfo(resultInfo, count, suffix, matches) {
+      if (count === 0) {
+        resultInfo.textContent = '0 件の画像が見つかりました' + suffix;
+        return;
+      }
+      resultInfo.innerHTML = count + ' 件の画像が見つかりました' + suffix +
+        '&nbsp;&nbsp;<button id="openSearchFlatBtn" style="padding:3px 10px;font-size:12px;border:1px solid #aaa;border-radius:4px;background:#fff;cursor:pointer;">一覧で見る</button>';
+      var btn = document.getElementById('openSearchFlatBtn');
+      if (btn) btn.addEventListener('click', function() { openSearchResultOverlay(matches); });
+    }
+
+    function renderOverlayGrid(allMatches) {
+      var body = document.getElementById('searchResultOverlayBody');
+      var title = document.getElementById('searchResultOverlayTitle');
+
+      var filtered = overlayFilteredSections.size > 0
+        ? allMatches.filter(function(m) { return overlayFilteredSections.has(m.sectionNum); })
+        : allMatches;
+
+      title.textContent = overlayFilteredSections.size > 0
+        ? '検索結果 ' + filtered.length + '件（全' + allMatches.length + '件中）'
+        : '検索結果 ' + allMatches.length + '件';
+
+      var html = '<div class="stock-grid">';
+      filtered.forEach(function(m) {
+        var src = m.src;
+        var alt = src.split('/').pop();
+        var srcA = escapeAttr(src), altA = escapeAttr(alt);
+        html += '<div class="stock-cell" data-src="' + srcA + '">' +
+          '<img src="' + srcA + '" alt="' + altA + '" loading="lazy" />' +
+          '<button class="stock-btn" type="button" aria-label="ストック">&#9734;</button>' +
+          '<div class="stock-cell-caption">' + altA + '</div></div>';
+      });
+      html += '</div>';
+      body.innerHTML = html;
+      StockManager.applyToPanel(body);
+      body.querySelectorAll('.stock-cell').forEach(function(cell) {
+        var src = cell.getAttribute('data-src');
+        if (StockManager.has(src)) {
+          cell.classList.add('stocked');
+          var btn = cell.querySelector('.stock-btn');
+          if (btn) btn.innerHTML = '&#9733;';
+        }
+      });
+    }
+
+    function buildOverlaySectionFilter(allMatches) {
+      var bar = document.getElementById('sectionFilterBar');
+      var seen = {};
+      allMatches.forEach(function(m) { seen[m.sectionNum] = true; });
+      var secNums = Object.keys(seen);
+      if (secNums.length <= 1) { bar.classList.remove('visible'); return; }
+
+      var html = '<span style="color:#888;font-size:12px;flex-shrink:0;margin-right:2px;">絞り込み:</span>';
+      html += '<button class="section-filter-chip active" data-sec="all">すべて</button>';
+      GALLERY_INDEX.forEach(function(s) {
+        if (!seen[s.num]) return;
+        var label = escapeAttr(s.name.replace(/^\d+_/, ''));
+        html += '<button class="section-filter-chip" data-sec="' + escapeAttr(s.num) + '">' + label + '</button>';
+      });
+      bar.innerHTML = html;
+      bar.classList.add('visible');
+
+      bar.onclick = function(e) {
+        var chip = e.target.closest('.section-filter-chip');
+        if (!chip) return;
+        var sec = chip.getAttribute('data-sec');
+        if (sec === 'all') {
+          overlayFilteredSections.clear();
+          bar.querySelectorAll('.section-filter-chip').forEach(function(c) { c.classList.remove('active'); });
+          chip.classList.add('active');
+        } else {
+          bar.querySelector('[data-sec="all"]').classList.remove('active');
+          if (overlayFilteredSections.has(sec)) {
+            overlayFilteredSections.delete(sec);
+            chip.classList.remove('active');
+            if (overlayFilteredSections.size === 0) {
+              bar.querySelector('[data-sec="all"]').classList.add('active');
+            }
+          } else {
+            overlayFilteredSections.add(sec);
+            chip.classList.add('active');
+          }
+        }
+        renderOverlayGrid(lastSearchMatches);
+      };
+    }
+
+    function openSearchResultOverlay(matches) {
+      var overlay = document.getElementById('searchResultOverlay');
+      var body = document.getElementById('searchResultOverlayBody');
+      overlayFilteredSections.clear();
+      buildOverlaySectionFilter(matches);
+      renderOverlayGrid(matches);
+      overlay.classList.add('open');
+
+      body.onclick = function(e) {
+        var cell = e.target.closest('.stock-cell');
+        if ((e.ctrlKey || e.metaKey) && cell) {
+          StockManager.toggle(cell.getAttribute('data-src'));
+          return;
+        }
+        var sbtn = e.target.closest('.stock-btn');
+        if (sbtn) {
+          if (cell) StockManager.toggle(cell.getAttribute('data-src'));
+          return;
+        }
+        var img = e.target.closest('.stock-cell img');
+        if (img) {
+          var imgs = Array.from(body.querySelectorAll('.stock-cell img'));
+          window.openModal(img, imgs);
+        }
+      };
+    }
+
+    function closeSearchResultOverlay() {
+      var overlay = document.getElementById('searchResultOverlay');
+      if (overlay) overlay.classList.remove('open');
+      overlayFilteredSections.clear();
+      document.getElementById('sectionFilterBar').classList.remove('visible');
+    }
+
+    // === Search Mode Toggle (AND/OR) ===
+    function initSearchModeToggle() {
+      var andBtn = document.getElementById('searchModeAnd');
+      var orBtn  = document.getElementById('searchModeOr');
+      function reSearch() {
+        var q = document.getElementById('imageSearchInput').value.trim();
+        if (q) performSearch(normalizeForSearch(q));
+      }
+      andBtn.addEventListener('click', function() {
+        searchMode = 'and';
+        andBtn.classList.add('active'); orBtn.classList.remove('active');
+        reSearch();
+      });
+      orBtn.addEventListener('click', function() {
+        searchMode = 'or';
+        orBtn.classList.add('active'); andBtn.classList.remove('active');
+        reSearch();
+      });
+      document.getElementById('searchResultOverlayCloseBtn').addEventListener('click', closeSearchResultOverlay);
+    }
+
+    // === Search Normalization ===
+    function normalizeForSearch(str) {
+      if (!str) return '';
+      return str
+        .toLowerCase()
+        // 全角英数字・記号 → 半角
+        .replace(/[！-～]/g, function(c) {
+          return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+        })
+        // ひらがな → カタカナ
+        .replace(/[ぁ-ゖ]/g, function(c) {
+          return String.fromCharCode(c.charCodeAt(0) + 0x60);
+        });
+    }
+
     function initSearch() {
       var searchInput = document.getElementById('imageSearchInput');
       var clearBtn = document.getElementById('searchClearBtn');
@@ -1177,6 +1412,8 @@
       }, { once: true });
 
       clearBtn.addEventListener('click', function() {
+        if (searchTimeout) clearTimeout(searchTimeout);
+        lastSearchMatches = [];
         searchInput.value = '';
         clearBtn.style.display = 'none';
         resultInfo.textContent = '';
@@ -1189,6 +1426,7 @@
         clearBtn.style.display = query.length > 0 ? 'block' : 'none';
 
         if (query === '') {
+          lastSearchMatches = [];
           resultInfo.textContent = '';
           resetSearchResults();
           return;
@@ -1197,64 +1435,54 @@
         // Debounce
         if (searchTimeout) clearTimeout(searchTimeout);
         searchTimeout = setTimeout(function() {
-          performSearch(query.toLowerCase());
+          performSearch(normalizeForSearch(query));
         }, 200);
       });
     }
 
     function resetSearchResults() {
-      // Reset all search-active states
-      document.querySelectorAll('.accordion.search-active').forEach(function(el) {
-        el.classList.remove('search-active');
-      });
-      document.querySelectorAll('.panel.search-active').forEach(function(el) {
-        el.classList.remove('search-active');
-      });
-      // Unhide all thumbs and rows in loaded sections
-      document.querySelectorAll('.image-row.hidden').forEach(function(el) {
-        el.classList.remove('hidden');
-      });
-      document.querySelectorAll('.image-row .thumb.hidden').forEach(function(el) {
-        el.classList.remove('hidden');
-      });
+      document.querySelectorAll('.accordion.search-active').forEach(function(el) { el.classList.remove('search-active'); });
+      document.querySelectorAll('.panel.search-active').forEach(function(el) { el.classList.remove('search-active'); });
+      document.querySelectorAll('.image-row.hidden').forEach(function(el) { el.classList.remove('hidden'); });
+      document.querySelectorAll('.image-row .thumb.hidden').forEach(function(el) { el.classList.remove('hidden'); });
+      closeSearchResultOverlay();
     }
 
     function performSearch(query) {
-      var resultInfo = document.getElementById('searchResultInfo');
+      var terms = query.split(/\s+/).filter(Boolean);
+      if (terms.length === 0) return;
 
-      // Use Web Worker if available, otherwise fall back to main-thread search
       if (searchWorker) {
-        searchWorker.postMessage({ type: 'search', query: query });
+        searchWorker.postMessage({ type: 'search', query: query, terms: terms, searchMode: searchMode });
       } else {
-        // Fallback: search through loaded sections on main thread
-        doMainThreadSearch(query);
+        doMainThreadSearch(query, terms);
       }
     }
 
-    function doMainThreadSearch(query) {
+    function matchesTerms(target, terms) {
+      var n = normalizeForSearch(target);
+      if (searchMode === 'and') return terms.every(function(t) { return n.includes(t); });
+      return terms.some(function(t) { return n.includes(t); });
+    }
+
+    function doMainThreadSearch(query, terms) {
+      terms = terms || query.split(/\s+/).filter(Boolean);
       var resultInfo = document.getElementById('searchResultInfo');
       var matchCount = 0;
       var matchingSections = new Set();
-
-      // First, ensure all sections are loaded for comprehensive search
-      // For performance, only search through the gallery index data
-      var allMatches = []; // array of { sectionNum, imageSrc }
+      var allMatches = [];
 
       GALLERY_INDEX.forEach(function(sec) {
         var data = window['GALLERY_' + sec.num];
-        if (!data) return; // section not loaded yet
+        if (!data) return;
 
         data.products.forEach(function(product) {
           product.images.forEach(function(src) {
-            var filename = src.split('/').pop().toLowerCase();
-            var isMatch = filename.includes(query) || src.toLowerCase().includes(query);
+            var isMatch = matchesTerms(src.split('/').pop(), terms) || matchesTerms(src, terms);
 
             if (!isMatch && typeof OCR_DATA !== 'undefined') {
-              // Try OCR search - need to decode the src to match OCR_DATA keys
               var key = decodeURIComponent(src);
-              if (OCR_DATA[key] && OCR_DATA[key].toLowerCase().includes(query)) {
-                isMatch = true;
-              }
+              if (OCR_DATA[key]) isMatch = matchesTerms(OCR_DATA[key], terms);
             }
 
             if (isMatch) {
@@ -1275,17 +1503,12 @@
         }
       });
 
-      if (unloadedSections.length > 0 && !ocrLoaded) {
-        // If OCR isn't loaded and sections aren't loaded, we can't search them
-        resultInfo.textContent = matchCount + ' 件の画像が見つかりました（一部セクション未読み込み - アコーディオンを開くと検索対象に含まれます）';
-      } else if (unloadedSections.length > 0) {
-        resultInfo.textContent = matchCount + ' 件の画像が見つかりました（一部セクション未読み込み）';
-      } else {
-        resultInfo.textContent = matchCount + ' 件の画像が見つかりました';
-      }
+      var suffix = unloadedSections.length > 0 ? '（一部セクション未読み込み）' : '';
+      updateSearchResultInfo(resultInfo, matchCount, suffix, allMatches);
 
       // Apply visual filtering to loaded panels
       resetSearchResults();
+      lastSearchMatches = allMatches;
 
       if (matchCount === 0) return;
 
@@ -1321,6 +1544,12 @@
       var workerCode = [
         'var ocrData = null;',
         'var galleryIndex = null;',
+        'function normalizeForSearch(str) {',
+        '  if (!str) return "";',
+        '  return str.toLowerCase()',
+        '    .replace(/[\\uFF01-\\uFF5E]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); })',
+        '    .replace(/[\\u3041-\\u3096]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) + 0x60); });',
+        '}',
         '',
         'self.onmessage = function(e) {',
         '  var msg = e.data;',
@@ -1329,23 +1558,25 @@
         '    galleryIndex = msg.galleryIndex;',
         '  } else if (msg.type === "search") {',
         '    var query = msg.query;',
+        '    var terms = msg.terms || [query];',
+        '    var mode = msg.searchMode || "and";',
+        '    function mt(target) {',
+        '      var n = normalizeForSearch(target);',
+        '      if (mode === "and") return terms.every(function(t) { return n.includes(t); });',
+        '      return terms.some(function(t) { return n.includes(t); });',
+        '    }',
         '    var matches = [];',
         '    if (!galleryIndex) { self.postMessage({ matches: [], query: query }); return; }',
         '    galleryIndex.forEach(function(sec) {',
         '      if (!sec.products) return;',
         '      sec.products.forEach(function(product) {',
         '        product.images.forEach(function(src) {',
-        '          var filename = src.split("/").pop().toLowerCase();',
-        '          var isMatch = filename.includes(query) || src.toLowerCase().includes(query);',
+        '          var isMatch = mt(src.split("/").pop()) || mt(src);',
         '          if (!isMatch && ocrData) {',
         '            var key = src;',
-        '            if (ocrData[key] && ocrData[key].toLowerCase().includes(query)) {',
-        '              isMatch = true;',
-        '            }',
+        '            if (ocrData[key] && mt(ocrData[key])) isMatch = true;',
         '          }',
-        '          if (isMatch) {',
-        '            matches.push({ sectionNum: sec.num, src: src });',
-        '          }',
+        '          if (isMatch) matches.push({ sectionNum: sec.num, src: src });',
         '        });',
         '      });',
         '    });',
@@ -1377,6 +1608,9 @@
           var result = e.data;
           handleSearchResults(result.matches, result.query);
         };
+
+        // 安全網: セクションロード完了後に Worker データを再送信
+        setTimeout(updateSearchWorkerData, 2000);
       } catch(err) {
         // Web Worker not supported, fallback to main thread
         searchWorker = null;
@@ -1385,9 +1619,10 @@
 
     function handleSearchResults(matches, query) {
       var resultInfo = document.getElementById('searchResultInfo');
-      resultInfo.textContent = matches.length + ' 件の画像が見つかりました';
+      updateSearchResultInfo(resultInfo, matches.length, '', matches);
 
       resetSearchResults();
+      lastSearchMatches = matches;
       if (matches.length === 0) return;
 
       var matchingSections = new Set();
@@ -1446,11 +1681,30 @@
     }
 
     // === Load all sections for search (triggered after OCR loads) ===
+    function updateSearchWorkerData() {
+      if (!searchWorker) return;
+      var fullData = GALLERY_INDEX.map(function(sec) {
+        var data = window['GALLERY_' + sec.num];
+        return { num: sec.num, products: data ? data.products : null };
+      });
+      searchWorker.postMessage({
+        type: 'init',
+        ocrData: typeof OCR_DATA !== 'undefined' ? OCR_DATA : null,
+        galleryIndex: fullData
+      });
+    }
+
     function loadAllSectionsForSearch() {
+      var pending = 0;
       GALLERY_INDEX.forEach(function(sec) {
         if (!window['GALLERY_' + sec.num]) {
+          pending++;
           var script = document.createElement('script');
           script.src = sec.file;
+          script.onload = function() {
+            pending--;
+            if (pending === 0) updateSearchWorkerData();
+          };
           document.head.appendChild(script);
         }
       });
@@ -1524,10 +1778,17 @@
           }
         });
         updateModalStockBtn();
-        // If overlay is open, re-render it
         if (stockOverlay.classList.contains('open')) {
           renderStockOverlay();
         }
+        // 検索結果オーバーレイの .stock-cell も即時反映
+        document.querySelectorAll('#searchResultOverlayBody .stock-cell').forEach(function(cell) {
+          var src = cell.getAttribute('data-src');
+          var stocked = stockSet.has(src);
+          cell.classList.toggle('stocked', stocked);
+          var btn = cell.querySelector('.stock-btn');
+          if (btn) btn.innerHTML = stocked ? '&#9733;' : '&#9734;';
+        });
       }
 
       return {
@@ -1963,6 +2224,7 @@
         initAccordions();
         initSidebar();
         initSearch();
+        initSearchModeToggle();
         updateCounterBtn();
         setTimeout(loadAllSectionsForSearch, 1000);
       }
