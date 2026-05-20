@@ -1063,7 +1063,7 @@
     }
 
     window.thumbClick = function(e, img) {
-      if (e.ctrlKey) {
+      if (e.ctrlKey || e.metaKey) {
         var thumb = img.closest('.thumb');
         if (thumb) StockManager.toggle(thumb.getAttribute('data-src'));
       } else {
