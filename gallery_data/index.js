@@ -110,5 +110,13 @@ var GALLERY_INDEX = [
     "varName": "GALLERY_14",
     "productCount": 62,
     "imageCount": 367
+  },
+  {
+    "num": "15",
+    "name": "15_05月データ",
+    "file": "gallery_data/section_15.js",
+    "varName": "GALLERY_15",
+    "productCount": 76,
+    "imageCount": 460
   }
 ];
