@@ -103,12 +103,18 @@
     /* === Search === */
     .search-container {
       background: #fff;
-      padding: 8px 16px;
+      padding: 8px 16px 6px;
       border-bottom: 1px solid #eee;
       margin-bottom: 10px;
       position: sticky;
       top: 0;
       z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+    .search-row {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -170,10 +176,39 @@
       transform: translateY(-50%) scale(1.1);
     }
     #searchResultInfo {
-      font-size: 13px;
-      color: #555;
-      padding: 4px 16px 0;
+      font-size: 14px;
+      color: #444;
       min-height: 1em;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 2px;
+    }
+    #searchResultInfo:empty { display: none; }
+    #searchResultInfo .result-count {
+      color: #667eea;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    #searchResultInfo .result-label { color: #555; }
+    #openSearchFlatBtn {
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(118, 75, 162, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    #openSearchFlatBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(118, 75, 162, 0.45);
     }
 
     /* === Accordion === */
@@ -745,20 +780,22 @@
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
     <div class="search-container">
-      <div class="search-input-wrapper">
-        <input type="text" id="imageSearchInput" placeholder="画像ファイル名または画像内のテキストで検索" autocomplete="off" spellcheck="false" />
-        <button id="searchClearBtn" type="button">&#10005;</button>
+      <div class="search-row">
+        <div class="search-input-wrapper">
+          <input type="text" id="imageSearchInput" placeholder="画像ファイル名または画像内のテキストで検索" autocomplete="off" spellcheck="false" />
+          <button id="searchClearBtn" type="button">&#10005;</button>
+        </div>
+        <div class="search-mode-toggle">
+          <button id="searchModeAnd" class="search-mode-btn active">AND</button>
+          <button id="searchModeOr"  class="search-mode-btn">OR</button>
+        </div>
+        <div class="accordion-controls">
+          <button onclick="expandAll()">全て開く</button>
+          <button onclick="collapseAll()">全て閉じる</button>
+        </div>
       </div>
-      <div class="search-mode-toggle">
-        <button id="searchModeAnd" class="search-mode-btn active">AND</button>
-        <button id="searchModeOr"  class="search-mode-btn">OR</button>
-      </div>
-      <div class="accordion-controls">
-        <button onclick="expandAll()">全て開く</button>
-        <button onclick="collapseAll()">全て閉じる</button>
-      </div>
+      <div id="searchResultInfo"></div>
     </div>
-    <div id="searchResultInfo"></div>
 
     <div id="galleryContainer"></div>
   </div>
@@ -1229,12 +1266,19 @@
     // === Search ===
     // === Search Result Info & Overlay ===
     function updateSearchResultInfo(resultInfo, count, suffix, matches) {
+      var safeSuffix = suffix ? String(suffix).replace(/[&<>"]/g, function(c) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];
+      }) : '';
       if (count === 0) {
-        resultInfo.textContent = '0 件の画像が見つかりました' + suffix;
+        resultInfo.innerHTML =
+          '<span class="result-count">0</span>' +
+          '<span class="result-label">件の画像が見つかりました' + safeSuffix + '</span>';
         return;
       }
-      resultInfo.innerHTML = count + ' 件の画像が見つかりました' + suffix +
-        '&nbsp;&nbsp;<button id="openSearchFlatBtn" style="padding:3px 10px;font-size:12px;border:1px solid #aaa;border-radius:4px;background:#fff;cursor:pointer;">一覧で見る</button>';
+      resultInfo.innerHTML =
+        '<span class="result-count">' + count + '</span>' +
+        '<span class="result-label">件の画像が見つかりました' + safeSuffix + '</span>' +
+        '<button id="openSearchFlatBtn" type="button">一覧で見る</button>';
       var btn = document.getElementById('openSearchFlatBtn');
       if (btn) btn.addEventListener('click', function() { openSearchResultOverlay(matches); });
     }
