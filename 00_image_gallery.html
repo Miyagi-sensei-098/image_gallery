@@ -385,6 +385,16 @@
       border-bottom: 1px solid #333;
       flex-shrink: 0;
     }
+    /* 検索結果オーバーレイ内のサブ検索ボックス */
+    #overlaySearchInput {
+      flex: 0 0 auto; width: 280px; min-width: 200px; max-width: 480px;
+      padding: 7px 12px; font-size: 14px;
+      background: #0f0f1e; color: #eee;
+      border: 1px solid #4a4a6e; border-radius: 16px;
+      outline: none;
+    }
+    #overlaySearchInput::placeholder { color: #777; }
+    #overlaySearchInput:focus { border-color: #6aa3e6; box-shadow: 0 0 0 2px rgba(106,163,230,0.2); }
     .stock-overlay-title {
       font-size: 16px;
       font-weight: bold;
@@ -1029,6 +1039,7 @@
   <!-- Search Result Overlay -->
   <div id="searchResultOverlay">
     <div class="stock-overlay-header">
+      <input type="text" id="overlaySearchInput" placeholder="この画面でキーワードを変更..." autocomplete="off" spellcheck="false" />
       <span class="stock-overlay-title" id="searchResultOverlayTitle">検索結果</span>
       <button type="button" class="close-btn" id="searchResultOverlayCloseBtn">閉じる</button>
     </div>
@@ -1882,6 +1893,22 @@
       renderOverlayGrid(matches);
       overlay.classList.add('open');
 
+      // サブ検索ボックスに現在のクエリを表示＋入力連動を初期化（1回だけ）
+      var overlayInput = document.getElementById('overlaySearchInput');
+      if (overlayInput) {
+        var mainInput = document.getElementById('imageSearchInput');
+        overlayInput.value = mainInput ? mainInput.value : '';
+        if (!overlayInput._wired) {
+          overlayInput._wired = true;
+          overlayInput.addEventListener('input', function() {
+            // メイン検索ボックスに同期して既存の検索ロジックを発火
+            if (!mainInput) return;
+            mainInput.value = this.value;
+            mainInput.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+        }
+      }
+
       body.onclick = function(e) {
         var cell = e.target.closest('.stock-cell');
         if ((e.ctrlKey || e.metaKey) && cell) {
@@ -2038,7 +2065,11 @@
       document.querySelectorAll('.image-row.hidden').forEach(function(el) { el.classList.remove('hidden'); });
       document.querySelectorAll('.image-row .thumb.hidden').forEach(function(el) { el.classList.remove('hidden'); });
       // activeVendorFilter は明示クリア（clearBtn / タグ✕）でのみ解除する
-      closeSearchResultOverlay();
+      // オーバーレイで再検索中はオーバーレイを閉じない（次の handleSearchResults で再描画される）
+      var overlay = document.getElementById('searchResultOverlay');
+      var overlayOpen = overlay && overlay.classList.contains('open');
+      var query = (document.getElementById('imageSearchInput') || {}).value || '';
+      if (!overlayOpen || !query.trim()) closeSearchResultOverlay();
     }
 
     function performSearch(query) {
@@ -2081,6 +2112,13 @@
         data.products.forEach(function(product) {
           product.images.forEach(function(src) {
             var fields = [src.split('/').pop(), src];
+            // 「1枚目」〜「5枚目」キーワードで順番絞り込み、5枚目は「SKU」(容量・規格)としても扱う
+            var nm_ = fields[0].match(/_(\d{2})\.[A-Za-z]+$/);
+            if (nm_) {
+              var nn = parseInt(nm_[1], 10);
+              if (nn >= 1 && nn <= 9) fields.push(nn + '枚目');
+              if (nn === 5) fields.push('SKU');
+            }
             var meta = getMeta(src);
             if (meta) {
               if (meta.name) fields.push(meta.name);
@@ -2164,6 +2202,12 @@
         '      sec.products.forEach(function(product) {',
         '        product.images.forEach(function(src) {',
         '          var fields = [src.split("/").pop(), src];',
+        '          var nm_ = fields[0].match(/_(\\d{2})\\.[A-Za-z]+$/);',
+        '          if (nm_) {',
+        '            var nn = parseInt(nm_[1], 10);',
+        '            if (nn >= 1 && nn <= 9) fields.push(nn + "枚目");',
+        '            if (nn === 5) fields.push("SKU");',
+        '          }',
         '          if (productMeta) {',
         '            var pm = productMeta[wNormId(src)];',
         '            if (pm) {',
@@ -2276,6 +2320,14 @@
           row.classList.add('hidden');
         }
       });
+
+      // 検索結果オーバーレイ表示中なら、新しい matches でグリッドを再描画
+      var overlay = document.getElementById('searchResultOverlay');
+      if (overlay && overlay.classList.contains('open')) {
+        buildOverlaySectionFilter(matches);
+        buildOverlayVendorFilter(matches);
+        renderOverlayGrid(matches);
+      }
     }
 
     function filterPanelImages(num, matchSrcSet) {
