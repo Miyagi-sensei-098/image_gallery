@@ -1,7 +1,7 @@
 ---
 name: monthly-folder-add
-description: 新規月別画像フォルダ（例：15_05月データ）を追加した際の一連の処理を行う。jpg→webp変換、ギャラリーデータ更新、OCR実行までを順に実施する。トリガー：「新しい月のフォルダを追加した」「月別データを追加」「webp変換してギャラリー更新してOCRかけて」「新規フォルダの処理」など。
-version: 1.0.0
+description: 新規月別画像フォルダ（例：15_05月データ）を追加した際の一連の処理を行う。jpg→webp変換、ギャラリーデータ更新、商品メタ（Excel→products.js）更新、OCR実行までを順に実施する。トリガー：「新しい月のフォルダを追加した」「月別データを追加」「webp変換してギャラリー更新してOCRかけて」「新規フォルダの処理」など。
+version: 1.1.0
 ---
 
 # 月別フォルダ追加ワークフロー
@@ -18,7 +18,7 @@ version: 1.0.0
 ## 全体フロー
 
 ```
-新規フォルダ追加 (jpg)
+新規フォルダ追加 (jpg) + Excelリスト追加 (00_list_xlsx/*.xlsx)
   ↓
 1. jpg → webp 変換（quality=80）
   ↓
@@ -26,10 +26,14 @@ version: 1.0.0
   ↓
 3. ギャラリーデータ再生成
   ↓
-4. OCR実行（バックグラウンド、GPU使用）
+4. 商品メタ（Excel → products.js）再生成
   ↓
-5. 動作確認 → コミット&プッシュ
+5. OCR実行（バックグラウンド、GPU使用）  ※ステップ4と並行可
+  ↓
+6. 動作確認 → コミット&プッシュ
 ```
+
+> 📝 ユーザーは新規月の画像フォルダと一緒に `00_list_xlsx/` にExcelリストを追加する運用。Excelのファイル名は決まっておらず、`00_list_xlsx/*.xlsx` を全て読む（`generate_product_meta.py` がフォルダ内全xlsxを自動検出する）。
 
 ---
 
@@ -96,7 +100,43 @@ Done! 15 sections -> gallery_data/
 
 ---
 
-## ステップ 4：OCR 実行（GPU・バックグラウンド）
+## ステップ 4：商品メタ（Excel → products.js）再生成
+
+新しい月のExcelリストが `00_list_xlsx/` に追加されたら実行する。`generate_product_meta.py` がフォルダ内の全 `.xlsx` を自動検出し、品番→商品名・事業者・楽天URLを抽出して `gallery_data/products.js` に出力する。
+
+```bash
+.venv/Scripts/python.exe generate_product_meta.py
+```
+
+出力例：
+```
+読み込み: ★★チームまさ★★楽天制作関連_共有_2026年度4月-3月.xlsx
+  - 【4月】品番コピー用: 60 件
+  - 【5月】品番コピー用: 79 件
+URL別名で補完: 40 件
+
+==== 生成結果 ====
+出力: gallery_data/products.js
+商品ID数: 932（商品名あり 926 / 事業者あり 843 / URLあり 878）
+
+==== 突き合わせ（画像 ⇔ 対応表）====
+画像の商品ID数: 816 / 対応表とマッチ: 801 (98%)
+画像はあるが名前が付かないID: 15 件
+    - 06_8月データ/22_new/...
+対応表にあるが画像が無いID: 131 件（参考）
+```
+
+### 確認ポイント
+- **マッチ率**：通常95%以上が目安。大きく下がる場合は新しいExcelの列構成が変わった可能性。
+- **「画像はあるが名前が付かないID」**：プレースホルダ（`new`, `uni_new` 等）は無視してOK。普通の品番がここに出る場合はExcel側のID表記揺れ（大小・空白・序数付き）の可能性 → 抽出スクリプトの `normalize_id` で吸収しているはずだが、新パターンが出たら報告。
+- **新しい事業者**：ドロワーの五十音ソート用に読みを `generate_product_meta.py` の `VENDOR_READINGS` 辞書に追記する。読みが分からない場合は **公式サイト・楽天ページ・WebSearchで確認**。読みを追記したら再実行で `products.js` に反映される。
+
+> ⚠️ `products.js` は機械生成物。手で編集しないこと。修正は `generate_product_meta.py`（`VENDOR_READINGS`、`VENDOR_STRONG`、`PRODUCT_HINT` など）を直して再生成する。
+> 📝 Excel側に新しい列構成・記法が出てきた場合（例：複数事業者のカンマ連結、新しい品番フォーマット等）は `extract_records()` を拡張する。
+
+---
+
+## ステップ 5：OCR 実行（GPU・バックグラウンド）
 
 `generate_ocr_data.py` は `ocr_data.js` に未登録の webp のみを差分処理する。
 
@@ -162,12 +202,14 @@ with open('ocr_data.js', 'w', encoding='utf-8') as f:
 
 ---
 
-## ステップ 5：動作確認 → コミット&プッシュ
+## ステップ 6：動作確認 → コミット&プッシュ
 
 ユーザーがブラウザ（`00_image_gallery.html`）で動作確認 → OKの指示を受けてから：
 
 ```bash
-git add "15_05月データ" ocr_data.js gallery_data/index.js gallery_data/section_NN.js
+git add "15_05月データ" ocr_data.js gallery_data/index.js gallery_data/section_NN.js gallery_data/products.js
+# generate_product_meta.py を編集した場合のみ追加
+# git add generate_product_meta.py
 git commit -m "26MMDD_Nmonth_OCR"   # 例：260604_5gatu_OCR
 git push
 ```
@@ -175,8 +217,10 @@ git push
 コミットメッセージ形式の前例：
 - `260520_search_update`
 - `260604_5gatu_OCR`
+- `260604_search_company`（商品名・事業者検索の追加時）
 
-> ⚠️ `.claude/settings.local.json`、`.claude/worktrees/`、`00_image_gallery_BLUR.html` などは無関係なので含めない。フォルダ・データファイルのみを明示的に `git add` する。
+> ⚠️ **`00_list_xlsx/` はリポジトリに含めない**。Excelには社内人名・進捗が含まれるため非公開（`products.js` だけ公開すればフロントは動く）。
+> ⚠️ `.claude/settings.local.json`、`.claude/launch.json`、`.claude/worktrees/`、`00_image_gallery_BLUR.html` も無関係なので含めない。フォルダ・データファイルのみを明示的に `git add` する。
 > ⚠️ コミット&プッシュは **ユーザーの明示的な指示があるまで実行しない**。
 
 ---

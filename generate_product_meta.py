@@ -31,6 +31,24 @@ XLSX_DIR = BASE_DIR / "00_list_xlsx"
 GALLERY_DIR = BASE_DIR / "gallery_data"
 OUT_FILE = GALLERY_DIR / "products.js"
 
+# 事業者名のエイリアス（表記揺れ・支店違いなどを同じ事業者として扱う）。
+# 「左→右」へ正規化する。新たに統合したい事業者はここに追記してください。
+VENDOR_ALIASES = {
+    # 「株式会社根室海鮮市場 北」は「株式会社根室海鮮市場」として扱う
+    "株式会社根室海鮮市場 北": "株式会社根室海鮮市場",
+    "株式会社根室海鮮市場　北": "株式会社根室海鮮市場",
+    # 「根室海宝(宝田 進)」は「根室海宝」として扱う
+    "根室海宝(宝田 進)": "根室海宝",
+    "根室海宝(宝田　進)": "根室海宝",
+    "根室海宝（宝田 進）": "根室海宝",
+    "根室海宝（宝田　進）": "根室海宝",
+}
+
+def apply_alias(v):
+    if not v:
+        return v
+    return VENDOR_ALIASES.get(str(v).strip(), str(v).strip())
+
 # 事業者名 -> 並び替え用の読み（ひらがな）。漢字とカナが混ざっても五十音順で並べるための辞書。
 # 読みが不明・新規の事業者はここに追記してください（無ければHTML側で屋号フォールバック）。
 VENDOR_READINGS = {
@@ -403,6 +421,26 @@ def main():
     meta = build_meta()
     if not meta:
         return
+
+    # 事業者エイリアス適用：vendor / vendors を正規化（同じ事業者として扱う表記揺れを統合）
+    alias_count = 0
+    for pid, rec in meta.items():
+        if rec.get("vendor"):
+            new_v = apply_alias(rec["vendor"])
+            if new_v != rec["vendor"]:
+                alias_count += 1
+            rec["vendor"] = new_v
+        if rec.get("vendors"):
+            normalized = [apply_alias(v) for v in rec["vendors"]]
+            # 同一事業者の重複（連結事業者で別表記が同じ社になる場合）を除去
+            seen, uniq = set(), []
+            for v in normalized:
+                if v not in seen:
+                    seen.add(v); uniq.append(v)
+            rec["vendors"] = uniq
+    if alias_count:
+        print("事業者エイリアスを適用: %d 件" % alias_count)
+
     write_products_js(meta)
 
     with_name = sum(1 for v in meta.values() if v["name"])

@@ -595,6 +595,33 @@
     #caption .cap-name { font-weight: bold; color: #fff; margin-right: 10px; }
     #caption .cap-vendor { color: #ccc; margin-right: 10px; }
     #caption .cap-file { color: #888; font-size: 12px; }
+    /* 検索バー横の事業者フィルタタグ */
+    #searchVendorTag {
+      display: inline-flex;
+      align-self: flex-start;     /* 親が flex column の時に横幅を伸ばされないように */
+      width: fit-content;          /* 内容の幅に合わせる */
+      max-width: 100%;
+      align-items: center;
+      gap: 4px;
+      background: #2a5db0;
+      color: #fff;
+      padding: 3px 4px 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin: 4px 8px 4px 0;
+      vertical-align: middle;
+    }
+    #searchVendorTag .vtag-label { opacity: 0.85; margin-right: 4px; }
+    #searchVendorTag .vtag-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    #searchVendorTag .vtag-close:hover { opacity: 0.75; }
     /* 同じ事業者を見るボタン（モーダル） */
     #viewVendorBtn {
       padding: 5px 12px;
@@ -844,11 +871,29 @@
     }
     .vendor-dd-item:hover, .vendor-drawer-item:hover { background: #2a2a40; }
     .vendor-dd-item .vc, .vendor-drawer-item .vc { color: #888; font-size: 11px; margin-left: 4px; flex-shrink: 0; }
+    /* チェックボックス（複数選択） */
+    .vendor-dd-item .vdd-check::before { content: '☐'; margin-right: 6px; color: #888; font-size: 14px; }
+    .vendor-dd-item.selected .vdd-check::before { content: '☑'; color: #6aa3e6; }
+    .vendor-dd-item.selected { background: rgba(42,93,176,0.22); color: #fff; }
+    .vendor-dd-item.selected:hover { background: rgba(42,93,176,0.32); }
+    .vendor-dd-all { color: #8aa; font-size: 12px; border-bottom: 1px solid #333; margin-bottom: 4px; padding-bottom: 9px; }
     .vfilter-tag {
+      display: inline-flex; align-items: center;
       background: #2a5db0; color: #fff; padding: 3px 10px;
       border-radius: 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
     }
+    .vfilter-tag:hover { background: #224d92; }
     .vfilter-x { margin-left: 5px; font-weight: bold; }
+    /* 選択中の事業者チップを横並び（複数選択時） */
+    #vendorActiveTag {
+      display: inline-flex; gap: 6px; flex-wrap: wrap;
+      align-items: center; vertical-align: middle; margin-left: 6px;
+    }
+    .vfilter-clear-all {
+      background: transparent; border: 1px solid #555; color: #aaa;
+      padding: 3px 10px; border-radius: 12px; font-size: 12px; cursor: pointer;
+    }
+    .vfilter-clear-all:hover { background: #2a2a40; color: #fff; }
 
     /* === 事業者ドロワー（右スライドイン） === */
     #vendorDrawerToggle {
@@ -951,6 +996,8 @@
         </div>
       </div>
       <div id="searchResultInfo"></div>
+      <!-- 事業者フィルタが効いている時のタグ（テキスト検索と AND） -->
+      <span id="searchVendorTag" style="display:none;"></span>
     </div>
 
     <div id="galleryContainer"></div>
@@ -1031,7 +1078,7 @@
   <!-- Gallery Index (lightweight, loads immediately) -->
   <script src="gallery_data/index.js"></script>
   <!-- 商品メタ情報（商品名・事業者・楽天URL）。generate_product_meta.py が生成 -->
-  <script src="gallery_data/products.js?v=20260604"></script>
+  <script src="gallery_data/products.js?v=20260605"></script>
 
   <script>
   (function() {
@@ -1046,7 +1093,8 @@
     var searchMode = 'and';
     var lastSearchMatches = [];
     var overlayFilteredSections = new Set(); // 空 = すべて表示
-    var overlayVendorFilter = null; // 事業者絞り込み（normVendorキー or null）
+    var activeVendorFilter = null; // 事業者フィルタ適用中の事業者表示名（null = 適用なし）
+    var overlayVendorFilter = new Set(); // 事業者絞り込み（normVendorキーの集合、空=絞り込みなし）
 
     // === Build Sidebar + Accordion from Index ===
     function buildGallery() {
@@ -1170,6 +1218,23 @@
         .replace(/[\s　]+/g, '')
         .replace(/^(北海道産?|根室)+/, '')
         .trim();
+    }
+    // 事業者の読み（ひらがな）lookup。
+    // VENDOR_READINGS のキーは正式表記（株式会社…）だが、normVendor で正規化したキーで持つことで、
+    // 連結事業者から分解された「カネカイチ鈴木商店」（会社種別なし）等も同じ key で引ける。
+    var VENDOR_READING_INDEX = (function() {
+      var idx = {};
+      if (typeof VENDOR_READINGS !== 'undefined') {
+        Object.keys(VENDOR_READINGS).forEach(function(k) {
+          var nk = normVendor(k);
+          if (nk) idx[nk] = VENDOR_READINGS[k];
+        });
+      }
+      return idx;
+    })();
+    function lookupReading(v) {
+      if (!v) return '';
+      return VENDOR_READING_INDEX[normVendor(v)] || '';
     }
     // 事業者キー -> { display:代表表示名, count:商品数 } を集計
     // 画像が実在する商品ID -> 画像枚数 を集計（事業者カウントの正確性のため）
@@ -1547,14 +1612,18 @@
       if (overlayFilteredSections.size > 0) {
         filtered = filtered.filter(function(m) { return overlayFilteredSections.has(m.sectionNum); });
       }
-      if (overlayVendorFilter) {
+      if (overlayVendorFilter.size > 0) {
         filtered = filtered.filter(function(m) {
           var meta = getMeta(m.src);
-          return meta && meta.vendor && normVendor(meta.vendor) === overlayVendorFilter;
+          if (!meta) return false;
+          // 連結事業者(vendors配列)の代表vendorが別社のケースを取りこぼさず、
+          // 選択された複数事業者のいずれかに含まれていれば OR でヒット
+          var list = (meta.vendors && meta.vendors.length > 0) ? meta.vendors : (meta.vendor ? [meta.vendor] : []);
+          return list.some(function(v) { return overlayVendorFilter.has(normVendor(v)); });
         });
       }
 
-      var isFiltered = overlayFilteredSections.size > 0 || overlayVendorFilter;
+      var isFiltered = overlayFilteredSections.size > 0 || overlayVendorFilter.size > 0;
       title.textContent = isFiltered
         ? '検索結果 ' + filtered.length + '件（全' + allMatches.length + '件中）'
         : '検索結果 ' + allMatches.length + '件';
@@ -1628,12 +1697,47 @@
     function buildOverlayVendorFilter(allMatches) {
       var bar = document.getElementById('vendorFilterBar');
       if (!bar) return;
+      // 既に事業者で絞り込まれている時は、別の事業者を選べる UI を出さない
+      // （連結事業者(vendors配列)を持つ商品の関係で別社が候補に出てしまうのを防ぐ）
+      if (activeVendorFilter) { bar.innerHTML = ''; bar.classList.remove('visible'); return; }
+
+      // 検索クエリの terms。連結事業者の他メンバーを候補から除外するために使う。
+      var queryStr = (document.getElementById('imageSearchInput') || {}).value || '';
+      var allTerms = queryStr.trim()
+        ? normalizeForSearch(queryStr.trim()).split(/\s+/).filter(Boolean)
+        : [];
+
+      // クエリの term のいずれかが、ヒット画像のいずれかの vendor（または読み）を含むか（事前スキャン）。
+      // 含まれていれば「事業者を狙ったクエリ」と判断して候補をその term にマッチする vendor だけに絞る。
+      // 含まれていなければ「商品名・OCR ヒット主体のクエリ」なので、全 vendor を候補に出す（従来挙動）。
+      var queryHasVendorHit = false;
+      if (allTerms.length > 0) {
+        outer: for (var mi = 0; mi < allMatches.length; mi++) {
+          var meta_ = getMeta(allMatches[mi].src);
+          if (!meta_) continue;
+          var vl = (meta_.vendors && meta_.vendors.length > 0) ? meta_.vendors : (meta_.vendor ? [meta_.vendor] : []);
+          for (var vj = 0; vj < vl.length; vj++) {
+            var nv = normalizeForSearch(vl[vj]);
+            var nr = normalizeForSearch(lookupReading(vl[vj]));
+            for (var tj = 0; tj < allTerms.length; tj++) {
+              if (nv.indexOf(allTerms[tj]) >= 0 || (nr && nr.indexOf(allTerms[tj]) >= 0)) { queryHasVendorHit = true; break outer; }
+            }
+          }
+        }
+      }
+
       var idx = {};
       allMatches.forEach(function(m) {
         var meta = getMeta(m.src);
         if (!meta) return;
         var list = (meta.vendors && meta.vendors.length > 0) ? meta.vendors : (meta.vendor ? [meta.vendor] : []);
         list.forEach(function(v) {
+          if (queryHasVendorHit) {
+            var nv = normalizeForSearch(v);
+            var nr = normalizeForSearch(lookupReading(v));
+            // クエリの term にマッチしない vendor は連結事業者の他メンバー → 除外
+            if (!allTerms.some(function(t) { return nv.indexOf(t) >= 0 || (nr && nr.indexOf(t) >= 0); })) return;
+          }
           var key = normVendor(v);
           if (!key) return;
           if (!idx[key]) idx[key] = { count: 0, displays: {} };
@@ -1650,11 +1754,11 @@
       });
       keys.sort(function(a, b) { return idx[b].count - idx[a].count; });
 
-      var listHtml = '<button class="vendor-dd-item" data-vk="" data-disp="">すべての事業者</button>';
+      var listHtml = '<button class="vendor-dd-item vendor-dd-all" data-vk="" data-disp="">すべての事業者</button>';
       keys.forEach(function(k) {
         var d = escapeAttr(idx[k].display);
         listHtml += '<button class="vendor-dd-item" data-vk="' + escapeAttr(k) + '" data-disp="' + d + '">' +
-          d + ' <span class="vc">(' + idx[k].count + ')</span></button>';
+          '<span class="vdd-check"></span>' + d + ' <span class="vc">(' + idx[k].count + ')</span></button>';
       });
 
       bar.innerHTML =
@@ -1684,30 +1788,86 @@
         });
       });
 
+      // 選択中の表示（summary・タグ）を Set のサイズに応じて切り替える。
+      // 複数選択中は各事業者を個別チップで横並びにし、それぞれの ✕ で1社ずつ解除できる。
+      function updateOverlayVendorSummary() {
+        var size = overlayVendorFilter.size;
+        if (size === 0) {
+          summary.innerHTML = 'すべて &#9662;';
+          tag.innerHTML = '';
+          return;
+        }
+        if (size === 1) {
+          var onlyKey;
+          overlayVendorFilter.forEach(function(k) { onlyKey = k; });
+          var onlyDisp = idx[onlyKey] ? idx[onlyKey].display : onlyKey;
+          var short = onlyDisp.length > 7 ? onlyDisp.slice(0, 7) + '…' : onlyDisp;
+          summary.innerHTML = escapeAttr(short) + ' &#9662;';
+          tag.innerHTML = '<span class="vfilter-tag" data-vk="' + escapeAttr(onlyKey) +
+            '" title="' + escapeAttr(onlyDisp) + '">事業者: ' + escapeAttr(onlyDisp) +
+            ' <span class="vfilter-x">&#10005;</span></span>';
+          return;
+        }
+        summary.innerHTML = size + '社選択中 &#9662;';
+        var html = '';
+        overlayVendorFilter.forEach(function(k) {
+          var disp = idx[k] ? idx[k].display : k;
+          var short = disp.length > 10 ? disp.slice(0, 10) + '…' : disp;
+          html += '<span class="vfilter-tag" data-vk="' + escapeAttr(k) +
+            '" title="' + escapeAttr(disp) + '">' + escapeAttr(short) +
+            ' <span class="vfilter-x">&#10005;</span></span>';
+        });
+        html += '<button type="button" class="vfilter-clear-all">すべて解除</button>';
+        tag.innerHTML = html;
+      }
+
       list.addEventListener('click', function(e) {
         var it = e.target.closest('.vendor-dd-item');
         if (!it) return;
         var vk = it.getAttribute('data-vk');
-        var disp = it.getAttribute('data-disp');
-        overlayVendorFilter = vk || null;
-        if (overlayVendorFilter) {
-          var short = disp.length > 7 ? disp.slice(0, 7) + '…' : disp;
-          summary.innerHTML = escapeAttr(short) + ' &#9662;';
-          tag.innerHTML = '<span class="vfilter-tag">事業者: ' + escapeAttr(disp) + ' <span class="vfilter-x">&#10005;</span></span>';
+        if (vk === '') {
+          // 「すべての事業者」= 全選択クリア
+          overlayVendorFilter.clear();
+          list.querySelectorAll('.vendor-dd-item').forEach(function(el) { el.classList.remove('selected'); });
         } else {
-          summary.innerHTML = 'すべて &#9662;';
-          tag.innerHTML = '';
+          if (overlayVendorFilter.has(vk)) {
+            overlayVendorFilter.delete(vk);
+            it.classList.remove('selected');
+          } else {
+            overlayVendorFilter.add(vk);
+            it.classList.add('selected');
+          }
         }
-        dd.open = false;
+        updateOverlayVendorSummary();
         renderOverlayGrid(lastSearchMatches);
+        // 複数選択ができるよう DD は開いたまま保持
+        dd.open = true;
       });
 
-      tag.addEventListener('click', function() {
-        overlayVendorFilter = null;
-        summary.innerHTML = 'すべて &#9662;';
-        tag.innerHTML = '';
-        if (search) search.value = '';
-        list.querySelectorAll('.vendor-dd-item').forEach(function(it) { it.style.display = ''; });
+      tag.addEventListener('click', function(e) {
+        // 「すべて解除」ボタン
+        if (e.target.closest('.vfilter-clear-all')) {
+          overlayVendorFilter.clear();
+          list.querySelectorAll('.vendor-dd-item').forEach(function(it) {
+            it.classList.remove('selected');
+            it.style.display = '';
+          });
+          if (search) search.value = '';
+          updateOverlayVendorSummary();
+          renderOverlayGrid(lastSearchMatches);
+          return;
+        }
+        // 個別チップ → その事業者だけ解除
+        var chip = e.target.closest('.vfilter-tag');
+        if (!chip) return;
+        var vk = chip.getAttribute('data-vk');
+        if (!vk) return;
+        overlayVendorFilter.delete(vk);
+        // 該当 item の .selected を外す（属性セレクタは escapeAttr 後の値で安全に引ける）
+        list.querySelectorAll('.vendor-dd-item').forEach(function(it) {
+          if (it.getAttribute('data-vk') === vk) it.classList.remove('selected');
+        });
+        updateOverlayVendorSummary();
         renderOverlayGrid(lastSearchMatches);
       });
     }
@@ -1716,7 +1876,7 @@
       var overlay = document.getElementById('searchResultOverlay');
       var body = document.getElementById('searchResultOverlayBody');
       overlayFilteredSections.clear();
-      overlayVendorFilter = null;
+      overlayVendorFilter.clear();
       buildOverlaySectionFilter(matches);
       buildOverlayVendorFilter(matches);
       renderOverlayGrid(matches);
@@ -1745,7 +1905,7 @@
       var overlay = document.getElementById('searchResultOverlay');
       if (overlay) overlay.classList.remove('open');
       overlayFilteredSections.clear();
-      overlayVendorFilter = null;
+      overlayVendorFilter.clear();
       document.getElementById('sectionFilterBar').classList.remove('visible');
       var vfb = document.getElementById('vendorFilterBar');
       if (vfb) vfb.classList.remove('visible');
@@ -1812,21 +1972,52 @@
         }
       }, { once: true });
 
+      var vendorTag = document.getElementById('searchVendorTag');
+
       clearBtn.addEventListener('click', function() {
         if (searchTimeout) clearTimeout(searchTimeout);
         lastSearchMatches = [];
         searchInput.value = '';
         clearBtn.style.display = 'none';
         resultInfo.textContent = '';
+        // 事業者タグも明示クリア
+        activeVendorFilter = null;
+        if (vendorTag) { vendorTag.style.display = 'none'; vendorTag.innerHTML = ''; }
         resetSearchResults();
         searchInput.focus();
       });
 
+      // 事業者タグの ✕ クリックで事業者フィルタだけ解除
+      if (vendorTag) {
+        vendorTag.addEventListener('click', function(e) {
+          if (!e.target.closest('.vtag-close')) return;
+          activeVendorFilter = null;
+          vendorTag.style.display = 'none';
+          vendorTag.innerHTML = '';
+          var q = searchInput.value.trim();
+          if (q) {
+            // 残っているテキストクエリで再検索
+            performSearch(normalizeForSearch(q));
+          } else {
+            // 検索クエリも事業者も無くなった → 完全リセット
+            lastSearchMatches = [];
+            clearBtn.style.display = 'none';
+            resultInfo.textContent = '';
+            resetSearchResults();
+          }
+        });
+      }
+
       searchInput.addEventListener('input', function() {
         var query = this.value.trim();
-        clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+        clearBtn.style.display = (query.length > 0 || activeVendorFilter) ? 'block' : 'none';
 
         if (query === '') {
+          if (activeVendorFilter) {
+            // 事業者フィルタだけ残す → 事業者ビューを再構築
+            applyVendorFilter(activeVendorFilter);
+            return;
+          }
           lastSearchMatches = [];
           resultInfo.textContent = '';
           resetSearchResults();
@@ -1846,6 +2037,7 @@
       document.querySelectorAll('.panel.search-active').forEach(function(el) { el.classList.remove('search-active'); });
       document.querySelectorAll('.image-row.hidden').forEach(function(el) { el.classList.remove('hidden'); });
       document.querySelectorAll('.image-row .thumb.hidden').forEach(function(el) { el.classList.remove('hidden'); });
+      // activeVendorFilter は明示クリア（clearBtn / タグ✕）でのみ解除する
       closeSearchResultOverlay();
     }
 
@@ -1860,95 +2052,58 @@
       }
     }
 
-    function matchesTerms(target, terms) {
-      var n = normalizeForSearch(target);
-      if (searchMode === 'and') return terms.every(function(t) { return n.includes(t); });
-      return terms.some(function(t) { return n.includes(t); });
+    // 画像1枚に紐づく全フィールドを集合として、AND/OR 判定する。
+    // AND: 各 term が「いずれかのフィールド」にヒットすれば成立（フィールド横断）
+    // OR:  いずれかのフィールドにいずれかの term があれば成立
+    function imageMatchesFields(fields, terms, mode) {
+      var norms = [];
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i]) norms.push(normalizeForSearch(fields[i]));
+      }
+      if (norms.length === 0) return false;
+      if (mode === 'and') {
+        return terms.every(function(t) {
+          return norms.some(function(n) { return n.indexOf(t) >= 0; });
+        });
+      }
+      return terms.some(function(t) {
+        return norms.some(function(n) { return n.indexOf(t) >= 0; });
+      });
     }
 
     function doMainThreadSearch(query, terms) {
       terms = terms || query.split(/\s+/).filter(Boolean);
-      var resultInfo = document.getElementById('searchResultInfo');
-      var matchCount = 0;
-      var matchingSections = new Set();
       var allMatches = [];
 
       GALLERY_INDEX.forEach(function(sec) {
         var data = window['GALLERY_' + sec.num];
         if (!data) return;
-
         data.products.forEach(function(product) {
           product.images.forEach(function(src) {
-            var isMatch = matchesTerms(src.split('/').pop(), terms) || matchesTerms(src, terms);
-
-            if (!isMatch) {
-              var meta = getMeta(src);
-              if (meta) {
-                if (meta.name && matchesTerms(meta.name, terms)) isMatch = true;
-                if (!isMatch) {
-                  var vs = (meta.vendors && meta.vendors.length > 0) ? meta.vendors : (meta.vendor ? [meta.vendor] : []);
-                  for (var vi = 0; vi < vs.length; vi++) { if (matchesTerms(vs[vi], terms)) { isMatch = true; break; } }
-                }
+            var fields = [src.split('/').pop(), src];
+            var meta = getMeta(src);
+            if (meta) {
+              if (meta.name) fields.push(meta.name);
+              var vs = (meta.vendors && meta.vendors.length > 0) ? meta.vendors : (meta.vendor ? [meta.vendor] : []);
+              for (var vi = 0; vi < vs.length; vi++) {
+                fields.push(vs[vi]);
+                var r = lookupReading(vs[vi]);
+                if (r) fields.push(r);
               }
             }
-
-            if (!isMatch && typeof OCR_DATA !== 'undefined') {
+            if (typeof OCR_DATA !== 'undefined') {
               var key = decodeURIComponent(src);
-              if (OCR_DATA[key]) isMatch = matchesTerms(OCR_DATA[key], terms);
+              if (OCR_DATA[key]) fields.push(OCR_DATA[key]);
             }
-
-            if (isMatch) {
-              matchCount++;
-              matchingSections.add(sec.num);
+            if (imageMatchesFields(fields, terms, searchMode)) {
               allMatches.push({ sectionNum: sec.num, src: src });
             }
           });
         });
       });
 
-      // Also search through unloaded sections via index
-      // Load matching sections that aren't loaded yet
-      var unloadedSections = [];
-      GALLERY_INDEX.forEach(function(sec) {
-        if (!window['GALLERY_' + sec.num]) {
-          unloadedSections.push(sec.num);
-        }
-      });
-
-      var suffix = unloadedSections.length > 0 ? '（一部セクション未読み込み）' : '';
-      updateSearchResultInfo(resultInfo, matchCount, suffix, allMatches);
-
-      // Apply visual filtering to loaded panels
-      resetSearchResults();
-      lastSearchMatches = allMatches;
-
-      if (matchCount === 0) return;
-
-      // Show matching sections
-      matchingSections.forEach(function(num) {
-        var acc = document.querySelector('.accordion[data-section="' + num + '"]');
-        var panel = sectionPanels[num];
-        if (acc) acc.classList.add('search-active');
-        if (panel) panel.classList.add('search-active');
-      });
-
-      // Filter thumbs in loaded panels
-      var matchSrcSet = new Set(allMatches.map(function(m) { return m.src; }));
-
-      document.querySelectorAll('.panel .thumb').forEach(function(thumb) {
-        var src = decodeURIComponent(thumb.getAttribute('data-src') || '');
-        if (!matchSrcSet.has(src)) {
-          thumb.classList.add('hidden');
-        }
-      });
-
-      // Hide rows with all thumbs hidden
-      document.querySelectorAll('.image-row').forEach(function(row) {
-        var visible = row.querySelectorAll('.thumb:not(.hidden)');
-        if (visible.length === 0) {
-          row.classList.add('hidden');
-        }
-      });
+      // handleSearchResults に委譲（事業者 AND フィルタ・描画・件数表示を一元化）
+      handleSearchResults(allMatches, query);
     }
 
     function initSearchWorker() {
@@ -1957,6 +2112,7 @@
         'var ocrData = null;',
         'var galleryIndex = null;',
         'var productMeta = null;',
+        'var vendorReadingIndex = null;',
         'function normalizeForSearch(str) {',
         '  if (!str) return "";',
         '  return str.toLowerCase()',
@@ -1971,6 +2127,15 @@
         '  s = s.replace(/-\\d{1,2}$/, "");',
         '  return s.toUpperCase();',
         '}',
+        'function wNormVendor(v) {',
+        '  if (!v) return "";',
+        '  return String(v)',
+        '    .replace(/株式会社|有限会社|合同会社|（株）|\\(株\\)|（有）|\\(有\\)/g, "")',
+        '    .replace(/創業\\d+/g, "")',
+        '    .replace(/[\\s　]+/g, "")',
+        '    .replace(/^(北海道産?|根室)+/, "")',
+        '    .trim();',
+        '}',
         '',
         'self.onmessage = function(e) {',
         '  var msg = e.data;',
@@ -1978,14 +2143,19 @@
         '    ocrData = msg.ocrData;',
         '    galleryIndex = msg.galleryIndex;',
         '    productMeta = msg.productMeta;',
+        '    vendorReadingIndex = msg.vendorReadingIndex;',
         '  } else if (msg.type === "search") {',
         '    var query = msg.query;',
         '    var terms = msg.terms || [query];',
         '    var mode = msg.searchMode || "and";',
-        '    function mt(target) {',
-        '      var n = normalizeForSearch(target);',
-        '      if (mode === "and") return terms.every(function(t) { return n.includes(t); });',
-        '      return terms.some(function(t) { return n.includes(t); });',
+        '    function checkImage(fields) {',
+        '      var norms = [];',
+        '      for (var i = 0; i < fields.length; i++) { if (fields[i]) norms.push(normalizeForSearch(fields[i])); }',
+        '      if (norms.length === 0) return false;',
+        '      if (mode === "and") {',
+        '        return terms.every(function(t) { return norms.some(function(n) { return n.indexOf(t) >= 0; }); });',
+        '      }',
+        '      return terms.some(function(t) { return norms.some(function(n) { return n.indexOf(t) >= 0; }); });',
         '    }',
         '    var matches = [];',
         '    if (!galleryIndex) { self.postMessage({ matches: [], query: query }); return; }',
@@ -1993,22 +2163,20 @@
         '      if (!sec.products) return;',
         '      sec.products.forEach(function(product) {',
         '        product.images.forEach(function(src) {',
-        '          var isMatch = mt(src.split("/").pop()) || mt(src);',
-        '          if (!isMatch && productMeta) {',
+        '          var fields = [src.split("/").pop(), src];',
+        '          if (productMeta) {',
         '            var pm = productMeta[wNormId(src)];',
         '            if (pm) {',
-        '              if (pm.name && mt(pm.name)) isMatch = true;',
-        '              if (!isMatch) {',
-        '                var vs = (pm.vendors && pm.vendors.length > 0) ? pm.vendors : (pm.vendor ? [pm.vendor] : []);',
-        '                for (var vi = 0; vi < vs.length; vi++) { if (mt(vs[vi])) { isMatch = true; break; } }',
+        '              if (pm.name) fields.push(pm.name);',
+        '              var vs = (pm.vendors && pm.vendors.length > 0) ? pm.vendors : (pm.vendor ? [pm.vendor] : []);',
+        '              for (var vi = 0; vi < vs.length; vi++) {',
+        '                fields.push(vs[vi]);',
+        '                if (vendorReadingIndex) { var r = vendorReadingIndex[wNormVendor(vs[vi])]; if (r) fields.push(r); }',
         '              }',
         '            }',
         '          }',
-        '          if (!isMatch && ocrData) {',
-        '            var key = src;',
-        '            if (ocrData[key] && mt(ocrData[key])) isMatch = true;',
-        '          }',
-        '          if (isMatch) matches.push({ sectionNum: sec.num, src: src });',
+        '          if (ocrData && ocrData[src]) fields.push(ocrData[src]);',
+        '          if (checkImage(fields)) matches.push({ sectionNum: sec.num, src: src });',
         '        });',
         '      });',
         '    });',
@@ -2034,6 +2202,7 @@
           type: 'init',
           ocrData: typeof OCR_DATA !== 'undefined' ? OCR_DATA : null,
           productMeta: typeof PRODUCT_META !== 'undefined' ? PRODUCT_META : null,
+          vendorReadingIndex: VENDOR_READING_INDEX,
           galleryIndex: fullData
         });
 
@@ -2051,6 +2220,19 @@
     }
 
     function handleSearchResults(matches, query) {
+      // 事業者フィルタが効いている場合、テキスト検索結果も事業者で AND 絞り込み
+      if (activeVendorFilter) {
+        var vKey = normVendor(activeVendorFilter);
+        matches = matches.filter(function(m) {
+          var meta = getMeta(m.src);
+          if (!meta) return false;
+          var list = (meta.vendors && meta.vendors.length > 0) ? meta.vendors : (meta.vendor ? [meta.vendor] : []);
+          for (var i = 0; i < list.length; i++) {
+            if (normVendor(list[i]) === vKey) return true;
+          }
+          return false;
+        });
+      }
       var resultInfo = document.getElementById('searchResultInfo');
       updateSearchResultInfo(resultInfo, matches.length, '', matches);
 
@@ -2124,6 +2306,7 @@
         type: 'init',
         ocrData: typeof OCR_DATA !== 'undefined' ? OCR_DATA : null,
         productMeta: typeof PRODUCT_META !== 'undefined' ? PRODUCT_META : null,
+        vendorReadingIndex: VENDOR_READING_INDEX,
         galleryIndex: fullData
       });
     }
@@ -2583,9 +2766,57 @@
     viewVendorBtn.addEventListener('click', function() {
       var meta = getMeta(currentModalSrc);
       if (!meta || !meta.vendor) return;
-      var base = window.location.href.split('?')[0].split('#')[0];
-      window.open(base + '?vendor=' + encodeURIComponent(meta.vendor), '_blank');
+      if (typeof window.closeModal === 'function') window.closeModal();
+      applyVendorFilter(meta.vendor);
     });
+
+    // === 事業者選択を「検索結果」として現タブ内に適用 ===
+    // ドロワー／モーダル／?vendor= URL の3経路すべてがこれを呼ぶ。
+    // 既存の handleSearchResults を流用するので、検索した時と全く同じUIになる。
+    function applyVendorFilter(vendorDisplay) {
+      if (!vendorDisplay) return;
+      var targetKey = normVendor(vendorDisplay);
+      if (!targetKey) return;
+
+      var matches = [];
+      GALLERY_INDEX.forEach(function(sec) {
+        var data = window['GALLERY_' + sec.num];
+        if (!data) return;
+        data.products.forEach(function(p) {
+          p.images.forEach(function(src) {
+            var m = getMeta(src);
+            if (!m) return;
+            var list = (m.vendors && m.vendors.length > 0) ? m.vendors : (m.vendor ? [m.vendor] : []);
+            for (var i = 0; i < list.length; i++) {
+              if (normVendor(list[i]) === targetKey) { matches.push({ sectionNum: sec.num, src: src }); break; }
+            }
+          });
+        });
+      });
+
+      // 検索ボックスは追加クエリ用に空のままにし、別タグで事業者を表示
+      var searchInput = document.getElementById('imageSearchInput');
+      var clearBtn = document.getElementById('searchClearBtn');
+      var vendorTag = document.getElementById('searchVendorTag');
+      if (vendorTag) {
+        vendorTag.innerHTML =
+          '<span class="vtag-label">事業者:</span>' + escapeAttr(vendorDisplay) +
+          '<button type="button" class="vtag-close" aria-label="事業者フィルタを解除">&#10005;</button>';
+        vendorTag.style.display = '';
+      }
+      if (clearBtn) clearBtn.style.display = 'block';
+      // 事業者フィルタを先にセット（handleSearchResults 内の AND ロジックが効くように）
+      activeVendorFilter = vendorDisplay;
+      // 既存のテキスト検索クエリがあればテキスト検索を再実行、無ければ事業者のみ
+      var existingQuery = searchInput ? searchInput.value.trim() : '';
+      if (existingQuery) {
+        performSearch(normalizeForSearch(existingQuery));
+      } else {
+        lastSearchMatches = matches;
+        handleSearchResults(matches, vendorDisplay);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     // === Stock Button Event Delegation (gallery thumbs) ===
     document.getElementById('galleryContainer').addEventListener('click', function(e) {
@@ -2824,9 +3055,8 @@
         var it = e.target.closest('.vendor-drawer-item');
         if (!it) return;
         var vendor = it.getAttribute('data-vendor');
-        var base = window.location.href.split('?')[0].split('#')[0];
-        window.open(base + '?vendor=' + encodeURIComponent(vendor), '_blank');
         closeDrawer();
+        applyVendorFilter(vendor);
       });
     }
 
@@ -2839,9 +3069,6 @@
       if (viewsetParam) {
         initSetView(decodeURIComponent(viewsetParam));
         updateCounterBtn();
-      } else if (vendorParam) {
-        initVendorView(decodeURIComponent(vendorParam));
-        updateCounterBtn();
       } else {
         buildGallery();
         initAccordions();
@@ -2850,7 +3077,20 @@
         initSearchModeToggle();
         initVendorDrawer();
         updateCounterBtn();
-        setTimeout(loadAllSectionsForSearch, 1000);
+        // ?vendor= の場合は通常UIを初期化したあと、全セクション読込完了後にフィルタを適用
+        if (vendorParam) {
+          var vendorName = decodeURIComponent(vendorParam);
+          loadAllSectionsForSearch();
+          var waitTimer = setInterval(function() {
+            var loaded = GALLERY_INDEX.every(function(s) { return !!window['GALLERY_' + s.num]; });
+            if (loaded) {
+              clearInterval(waitTimer);
+              applyVendorFilter(vendorName);
+            }
+          }, 200);
+        } else {
+          setTimeout(loadAllSectionsForSearch, 1000);
+        }
       }
     });
 
