@@ -710,10 +710,7 @@
     body.set-view .stock-btn,
     body.set-view #modalStockBtn,
     body.set-view #modalHoverStockBtn,
-    body.set-view #viewSiblingSetBtn,
-    body.set-view #rakutenLinkBtn,
-    body.set-view #viewVendorBtn,
-    body.set-view #googleDriveFolderBtn { display: none !important; }
+    body.set-view #viewSiblingSetBtn { display: none !important; }
     body.set-view .main-content { margin-left: 0 !important; }
     #set-view-panel .image-row { flex-wrap: wrap; }
 
@@ -2892,6 +2889,11 @@
     viewVendorBtn.addEventListener('click', function() {
       var meta = getMeta(currentModalSrc);
       if (!meta || !meta.vendor) return;
+      if (isSubTab()) {
+        var base = window.location.href.split('?')[0].split('#')[0];
+        window.open(base + '?vendor=' + encodeURIComponent(meta.vendor), '_blank');
+        return;
+      }
       if (typeof window.closeModal === 'function') window.closeModal();
       applyVendorFilter(meta.vendor);
     });
