@@ -1,7 +1,7 @@
 ---
 name: monthly-folder-add
 description: 新規月別画像フォルダ（例：15_05月データ）を追加した際の一連の処理を行う。jpg→webp変換、ギャラリーデータ更新、商品メタ（Excel→products.js）更新、OCR実行までを順に実施する。トリガー：「新しい月のフォルダを追加した」「月別データを追加」「webp変換してギャラリー更新してOCRかけて」「新規フォルダの処理」など。
-version: 1.1.0
+version: 1.1.1
 ---
 
 # 月別フォルダ追加ワークフロー
@@ -130,8 +130,9 @@ URL別名で補完: 40 件
 - **マッチ率**：通常95%以上が目安。大きく下がる場合は新しいExcelの列構成が変わった可能性。
 - **「画像はあるが名前が付かないID」**：プレースホルダ（`new`, `uni_new` 等）は無視してOK。普通の品番がここに出る場合はExcel側のID表記揺れ（大小・空白・序数付き）の可能性 → 抽出スクリプトの `normalize_id` で吸収しているはずだが、新パターンが出たら報告。
 - **新しい事業者**：ドロワーの五十音ソート用に読みを `generate_product_meta.py` の `VENDOR_READINGS` 辞書に追記する。読みが分からない場合は **公式サイト・楽天ページ・WebSearchで確認**。読みを追記したら再実行で `products.js` に反映される。
+- **事業者の表記揺れを統合したい場合**：同じ事業者が支店名・担当者名付きなど別表記で出てくる場合（例：「株式会社根室海鮮市場 北」と「株式会社根室海鮮市場」、「根室海宝(宝田 進)」と「根室海宝」）は、`generate_product_meta.py` の `VENDOR_ALIASES` 辞書に「左→右」のマッピングを追加する。再実行時に `事業者エイリアスを適用: N 件` と出れば反映成功。
 
-> ⚠️ `products.js` は機械生成物。手で編集しないこと。修正は `generate_product_meta.py`（`VENDOR_READINGS`、`VENDOR_STRONG`、`PRODUCT_HINT` など）を直して再生成する。
+> ⚠️ `products.js` は機械生成物。手で編集しないこと。修正は `generate_product_meta.py`（`VENDOR_READINGS`、`VENDOR_ALIASES`、`VENDOR_STRONG`、`PRODUCT_HINT` など）を直して再生成する。
 > 📝 Excel側に新しい列構成・記法が出てきた場合（例：複数事業者のカンマ連結、新しい品番フォーマット等）は `extract_records()` を拡張する。
 
 ---

@@ -614,6 +614,20 @@
       display: inline-block;
     }
     #rakutenLinkBtn:hover { background-color: #a00000; }
+    /* Googleドライブで商品フォルダを検索（モーダル・アイコンのみ） */
+    #googleDriveFolderBtn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 9px;
+      cursor: pointer;
+      background-color: #fff;
+      border: 1px solid #dadce0;
+      border-radius: 3px;
+      margin: 5px;
+    }
+    #googleDriveFolderBtn:hover { background-color: #f1f3f4; }
+    #googleDriveFolderBtn svg { display: block; flex-shrink: 0; }
     /* モーダルのキャプション内訳（商品名・事業者・ファイル名） */
     #caption .cap-name { font-weight: bold; color: #fff; margin-right: 10px; }
     #caption .cap-vendor { color: #ccc; margin-right: 10px; }
@@ -698,7 +712,8 @@
     body.set-view #modalHoverStockBtn,
     body.set-view #viewSiblingSetBtn,
     body.set-view #rakutenLinkBtn,
-    body.set-view #viewVendorBtn { display: none !important; }
+    body.set-view #viewVendorBtn,
+    body.set-view #googleDriveFolderBtn { display: none !important; }
     body.set-view .main-content { margin-left: 0 !important; }
     #set-view-panel .image-row { flex-wrap: wrap; }
 
@@ -1042,6 +1057,16 @@
         <span id="modalCounter" style="color:#888;font-size:13px;"></span>
         <button id="copyFilenameBtn">ファイル名をコピー</button>
         <button id="copyPrefixBtn">プレフィックスをコピー</button>
+        <button id="googleDriveFolderBtn" type="button" style="display:none;" title="この月の制作データフォルダをGoogleドライブで開く" aria-label="Googleドライブで開く">
+          <svg viewBox="0 0 87.3 78" width="20" height="20" aria-hidden="true" focusable="false">
+            <path fill="#1967D2" d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z"/>
+            <path fill="#34A853" d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.4C.4 49.8 0 51.35 0 52.9h27.5z"/>
+            <path fill="#EA4335" d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 11.5z"/>
+            <path fill="#188038" d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z"/>
+            <path fill="#4285F4" d="M59.8 52.9H27.5L13.75 76.7c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z"/>
+            <path fill="#FBBC04" d="M73.4 26.5L60.75 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.8 52.9h27.45c0-1.55-.4-3.1-1.2-4.5z"/>
+          </svg>
+        </button>
         <button id="modalStockBtn" type="button">&#9734; ストック</button>
         <button id="viewSiblingSetBtn" type="button">このセットを見る</button>
         <a id="rakutenLinkBtn" href="#" target="_blank" rel="noopener" style="display:none;">楽天ページを開く</a>
@@ -1515,6 +1540,7 @@
       modalNextBtn.disabled = index >= modalImages.length - 1;
       updateModalStockBtn();
       updateSiblingBtn();
+      updateGoogleDriveBtn(currentModalSrc);
 
       var originalFilenameBtnText = 'ファイル名をコピー';
       var originalPrefixBtnText = 'プレフィックスをコピー';
@@ -2868,6 +2894,29 @@
       if (!meta || !meta.vendor) return;
       if (typeof window.closeModal === 'function') window.closeModal();
       applyVendorFilter(meta.vendor);
+    });
+
+    // === Googleドライブ 月別フォルダリンク ===
+    // 画像パス先頭のフォルダ名（= GALLERY_INDEX の name）から月別 Drive フォルダIDを引く。
+    // googleDriveFolderId が無いセクション（カテゴリ等）は null → ボタン非表示。
+    // ※Driveのフォルダ名検索は連番接頭辞からの前方一致のため商品コードでは当たらず、
+    //   月フォルダを開いて目視で探す運用（検索方式は不可と検証済み）。
+    var googleDriveFolderBtn = document.getElementById('googleDriveFolderBtn');
+    function getDriveFolderId(src) {
+      if (!src) return null;
+      var folder = String(src).split('/')[0];
+      for (var i = 0; i < GALLERY_INDEX.length; i++) {
+        if (GALLERY_INDEX[i].name === folder) return GALLERY_INDEX[i].googleDriveFolderId || null;
+      }
+      return null;
+    }
+    function updateGoogleDriveBtn(src) {
+      if (!googleDriveFolderBtn) return;
+      googleDriveFolderBtn.style.display = getDriveFolderId(src) ? '' : 'none';
+    }
+    googleDriveFolderBtn.addEventListener('click', function() {
+      var id = getDriveFolderId(currentModalSrc);
+      if (id) window.open('https://drive.google.com/drive/folders/' + id, '_blank', 'noopener');
     });
 
     // === 事業者選択を「検索結果」として現タブ内に適用 ===
