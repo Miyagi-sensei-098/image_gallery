@@ -4,6 +4,17 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>画像一覧</title>
+  <link id="faviconLink" rel="icon" type="image/webp" href="00_logo/nemuro_logo_main.webp" />
+  <script>
+    // メイン=赤ロゴ / サブタブ(?viewset= ・ ?vendor=)=青ロゴ。描画前に同期実行してチラつきを抑える。
+    (function () {
+      var p = new URLSearchParams(location.search);
+      if (p.get('viewset') || p.get('vendor')) {
+        var l = document.getElementById('faviconLink');
+        if (l) l.href = '00_logo/nemuro_logo_sub.webp';
+      }
+    })();
+  </script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -92,6 +103,8 @@
     /* === Main Content === */
     .main-content {
       flex: 1;
+      min-width: 0;            /* flex子が縮めるように（狭幅で画像がはみ出すのを防ぐ） */
+      overflow-x: hidden;      /* 念のため横スクロールを抑止 */
       margin-left: 220px;
       transition: margin-left 0.3s ease;
       padding: 0 20px 40px;
@@ -251,13 +264,13 @@
 
     /* === Image Grid === */
     .image-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr)); /* 横5枚固定・0まで縮小可（はみ出し防止） */
       width: 100%;
       margin-bottom: 5px;
     }
     .image-row .thumb {
-      flex: 0 0 20%;
-      width: 20%;
+      min-width: 0;            /* grid列に追従して縮む */
       padding: 2px;
       position: relative;
       box-sizing: border-box;
@@ -604,6 +617,7 @@
     /* モーダルのキャプション内訳（商品名・事業者・ファイル名） */
     #caption .cap-name { font-weight: bold; color: #fff; margin-right: 10px; }
     #caption .cap-vendor { color: #ccc; margin-right: 10px; }
+    #caption .cap-month { color: #9fd0ff; margin-right: 10px; }
     #caption .cap-file { color: #888; font-size: 12px; }
     /* 検索バー横の事業者フィルタタグ */
     #searchVendorTag {
@@ -1220,6 +1234,39 @@
       if (typeof PRODUCT_META === 'undefined' || !src) return null;
       return PRODUCT_META[normalizeId(src)] || null;
     }
+
+    // === 格納月（フォルダ名 -> "YYYY年M月"）===
+    // フォルダ名には月しか入っていないため、最初の月別フォルダ(06_8月データ)=2025年8月 を起点に
+    // GALLERY_INDEX を順に走査し、月が前回以下に戻ったら年を+1して年を自動付与する（同じ月の再来による混同を解消）。
+    var SECTION_MONTH = (function () {
+      var map = {}, year = 2025, prev = null;
+      if (typeof GALLERY_INDEX === 'undefined') return map;
+      GALLERY_INDEX.forEach(function (sec) {
+        var m = /(\d{1,2})月/.exec(sec.name);
+        if (!m) { map[sec.name] = null; return; }     // カテゴリ（緑ラベル等）は月情報なし
+        var month = parseInt(m[1], 10);
+        if (prev !== null && month <= prev) year++;    // 12月→1月 などの折返しで翌年
+        prev = month;
+        map[sec.name] = year + '年' + month + '月';
+      });
+      return map;
+    })();
+    // 画像パス先頭のフォルダ名から格納月ラベルを返す。
+    // 月次フォルダは "YYYY年M月"、非月次（緑ラベル等のイレギュラー）はフォルダ名（連番接頭辞除く）を返す。
+    // src が空など本当に不明な時のみ null（各表示箇所で「不明」になる）。
+    function getStorageMonth(src) {
+      if (!src) return null;
+      var folder = String(src).split('/')[0];
+      var month = SECTION_MONTH[folder];                  // 月次なら "YYYY年M月"、非月次は null/undefined
+      if (month) return month;
+      return folder ? folder.replace(/^\d+_/, '') : null; // 非月次はフォルダ名（連番除く）= 緑ラベル 等
+    }
+
+    // サブタブ判定（?viewset= 商品セット表示 / ?vendor= 事業者別表示）。メインギャラリーは false。
+    function isSubTab() {
+      var p = new URLSearchParams(window.location.search);
+      return !!(p.get('viewset') || p.get('vendor'));
+    }
     // 事業者名の表記ゆれを吸収したグルーピングキー（株式会社等・空白・創業年を除去）
     function normVendor(v) {
       if (!v) return '';
@@ -1458,6 +1505,7 @@
       var capHtml = '';
       if (meta && meta.name) capHtml += '<span class="cap-name">' + escapeAttr(meta.name) + '</span>';
       if (meta && meta.vendor) capHtml += '<span class="cap-vendor">' + escapeAttr(meta.vendor) + '</span>';
+      capHtml += '<span class="cap-month">格納月：' + escapeAttr(getStorageMonth(currentModalSrc) || '不明') + '</span>';
       capHtml += '<span class="cap-file">' + escapeAttr(filename) + '</span>';
       captionText.innerHTML = capHtml;
       updateRakutenBtn(meta);
@@ -1647,7 +1695,7 @@
         html += '<div class="stock-cell" data-src="' + srcA + '">' +
           '<img src="' + srcA + '" alt="' + altA + '" loading="lazy" />' +
           '<button class="stock-btn" type="button" aria-label="ストック">&#9734;</button>' +
-          '<div class="stock-cell-caption">' + altA + '</div></div>';
+          '<div class="stock-cell-caption">' + altA + ' ｜ 格納月：' + escapeAttr(getStorageMonth(src) || '不明') + '</div></div>';
       });
       html += '</div>';
       body.innerHTML = html;
@@ -2542,7 +2590,7 @@
         html += '<div class="stock-cell" data-src="' + srcAttr + '">' +
           '<img src="' + srcAttr + '" alt="' + altAttr + '" loading="lazy" />' +
           '<button class="stock-btn" type="button" aria-label="ストック解除">&#9733;</button>' +
-          '<div class="stock-cell-caption">' + altAttr + '</div>' +
+          '<div class="stock-cell-caption">' + altAttr + ' ｜ 格納月：' + escapeAttr(getStorageMonth(src) || '不明') + '</div>' +
           '</div>';
       });
       html += '</div>';
@@ -2924,7 +2972,7 @@
         }
 
         document.getElementById('setViewTitle').textContent =
-          '商品セット: ' + product.id + '（' + product.images.length + ' 枚）';
+          '商品セット: ' + product.id + '（' + product.images.length + ' 枚）｜格納月：' + (getStorageMonth(src) || '不明');
         document.title = '商品セット: ' + product.id;
 
         var container = document.getElementById('galleryContainer');
@@ -3115,6 +3163,15 @@
     // === Init ===
     document.addEventListener('DOMContentLoaded', function() {
       StockManager.loadFromStorage();
+
+      // メインギャラリーのみ、誤って閉じる/リロードする前にブラウザ標準の確認を出す。
+      // サブタブ(?viewset= / ?vendor=)では出さない。モーダル/オーバーレイの開閉は unload しないため影響なし。
+      if (!isSubTab()) {
+        window.addEventListener('beforeunload', function (e) {
+          e.preventDefault();
+          e.returnValue = '';
+        });
+      }
 
       var viewsetParam = new URLSearchParams(window.location.search).get('viewset');
       var vendorParam = new URLSearchParams(window.location.search).get('vendor');
