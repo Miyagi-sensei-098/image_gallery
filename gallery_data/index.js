@@ -128,5 +128,14 @@ var GALLERY_INDEX = [
     "productCount": 76,
     "imageCount": 460,
     "googleDriveFolderId": "1tp846yeaDLlZ2hsu4r5QcSsAxQAuu_uS"
+  },
+  {
+    "num": "16",
+    "name": "16_06月データ",
+    "file": "gallery_data/section_16.js",
+    "varName": "GALLERY_16",
+    "productCount": 65,
+    "imageCount": 404,
+    "googleDriveFolderId": "1yj5LcVdRt2056rV4NAlKSzFbYAo8wkHS"
   }
 ];

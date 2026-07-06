@@ -148,8 +148,33 @@ def generate_section_data(section_dir, section_name):
     }
 
 
+def load_existing_drive_ids():
+    """既存の index.js から googleDriveFolderId を読み取り、
+    セクション名 -> ID の辞書で返す（再生成時に引き継ぐため）。"""
+    index_file = OUTPUT_DIR / "index.js"
+    if not index_file.exists():
+        return {}
+    try:
+        content = index_file.read_text(encoding="utf-8").strip()
+        # "var GALLERY_INDEX = [...];" から JSON 部分を取り出す
+        json_str = content[content.index("["):content.rindex("]") + 1]
+        entries = json.loads(json_str)
+        return {
+            e["name"]: e["googleDriveFolderId"]
+            for e in entries if e.get("googleDriveFolderId")
+        }
+    except (ValueError, KeyError, json.JSONDecodeError) as e:
+        print(f"警告: 既存index.jsの読み取りに失敗（googleDriveFolderIdは引き継がれません）: {e}")
+        return {}
+
+
 def main():
     OUTPUT_DIR.mkdir(exist_ok=True)
+
+    # 手動付与された googleDriveFolderId を引き継ぐ
+    drive_ids = load_existing_drive_ids()
+    if drive_ids:
+        print(f"googleDriveFolderId 引き継ぎ: {len(drive_ids)}件")
 
     # セクションフォルダを検出
     sections = []
@@ -158,6 +183,8 @@ def main():
             match = SECTION_PATTERN.match(item.name)
             if match:
                 num = match.group(1)
+                if num == "00":  # 00_list_xlsx, 00_logo 等の管理用フォルダは対象外
+                    continue
                 sections.append((num, item.name, item))
 
     if not sections:
@@ -181,14 +208,17 @@ def main():
         output_file = OUTPUT_DIR / f"section_{num}.js"
         output_file.write_text(js_content, encoding="utf-8")
 
-        index_data.append({
+        entry = {
             "num": num,
             "name": name,
             "file": f"gallery_data/section_{num}.js",
             "varName": js_var_name,
             "productCount": data["productCount"],
             "imageCount": data["imageCount"]
-        })
+        }
+        if name in drive_ids:
+            entry["googleDriveFolderId"] = drive_ids[name]
+        index_data.append(entry)
 
     # インデックスファイル出力
     index_js = f"var GALLERY_INDEX = {json.dumps(index_data, ensure_ascii=False, indent=2)};\n"
