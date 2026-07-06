@@ -1,12 +1,22 @@
 ---
 name: monthly-folder-add
 description: 新規月別画像フォルダ（例：15_05月データ）を追加した際の一連の処理を行う。jpg→webp変換、ギャラリーデータ更新、商品メタ（Excel→products.js）更新、OCR実行までを順に実施する。トリガー：「新しい月のフォルダを追加した」「月別データを追加」「webp変換してギャラリー更新してOCRかけて」「新規フォルダの処理」など。
-version: 1.1.1
+version: 1.2.0
 ---
 
 # 月別フォルダ追加ワークフロー
 
 `99_sample一覧` プロジェクトに新しい月別画像フォルダ（例：`15_05月データ`）を追加したときに実施する標準処理。
+
+## ユーザーから受け取る入力（作業開始前に3点そろえる）
+
+| # | 入力 | 確認方法 |
+|---|---|---|
+| ① | 新規月フォルダ（jpg） | プロジェクト直下に `{2桁番号}_{月}月データ` があるか |
+| ② | その月の「○月データ_保管」GoogleドライブフォルダのURL | **未提供なら AskUserQuestion で確認してから進む**（ステップ3のgoogleDriveFolderIdに必要） |
+| ③ | 品番Excel | `00_list_xlsx/` に当年度の xlsx が置かれているか（シート「【N月】品番コピー用」に新月分があるか） |
+
+この3点がそろっていれば、以降のステップはユーザーへの削除確認（ステップ2）とコミット指示（ステップ6）以外、確認なしで完遂できる。
 
 ## 前提
 
@@ -18,13 +28,13 @@ version: 1.1.1
 ## 全体フロー
 
 ```
-新規フォルダ追加 (jpg) + Excelリスト追加 (00_list_xlsx/*.xlsx)
+新規フォルダ追加 (jpg) + Excelリスト追加 (00_list_xlsx/*.xlsx) + GoogleドライブURL受領
   ↓
 1. jpg → webp 変換（quality=80）
   ↓
 2. 元jpg削除（確認後）
   ↓
-3. ギャラリーデータ再生成
+3. ギャラリーデータ再生成 ＋ 新月の googleDriveFolderId を index.js に追記
   ↓
 4. 商品メタ（Excel → products.js）再生成
   ↓
@@ -92,11 +102,34 @@ rm 15_05月データ/*.jpg
 
 出力例：
 ```
+googleDriveFolderId 引き継ぎ: 10件
   スキャン中: 15_05月データ ... 76商品, 460枚
 Done! 15 sections -> gallery_data/
 ```
 
 ブラウザで `00_image_gallery.html` を再読み込みすると新フォルダが表示される。
+
+### 新月の googleDriveFolderId を index.js に追記する
+
+モーダルのGoogleドライブボタン（月の「○月データ_保管」フォルダを開く）用。
+
+1. 既存月のID（06月〜）は `generate_gallery_data.py` が既存 index.js から**自動で引き継ぐ**（v1.2.0で対応済み。ログの `googleDriveFolderId 引き継ぎ: N件` で確認）。
+2. **新月分だけは手動追記**：ユーザーから受け取ったDrive URL（`https://drive.google.com/drive/folders/{ID}`）の `folders/` 以降がID。`gallery_data/index.js` の新月エントリに追記する：
+
+```json
+{
+  "num": "16",
+  "name": "16_06月データ",
+  ...
+  "imageCount": 404,
+  "googleDriveFolderId": "1yj5LcVdRt2056rV4NAlKSzFbYAo8wkHS"
+}
+```
+
+3. 追記後の検証：index.js をJSONパースして「セクション数」と「googleDriveFolderId数（06月以降の月数と一致）」を確認する。
+4. ブラウザでの反映確認は **Ctrl+F5**（index.js はバージョン文字列なしで読まれるためキャッシュされやすい）。
+
+> ⚠️ index.js は機械生成物。手編集はこの googleDriveFolderId 追記だけに限定する。
 
 ---
 
@@ -208,9 +241,10 @@ with open('ocr_data.js', 'w', encoding='utf-8') as f:
 ユーザーがブラウザ（`00_image_gallery.html`）で動作確認 → OKの指示を受けてから：
 
 ```bash
+# gallery_data/index.js には新月の googleDriveFolderId 追記分が含まれる
 git add "15_05月データ" ocr_data.js gallery_data/index.js gallery_data/section_NN.js gallery_data/products.js
-# generate_product_meta.py を編集した場合のみ追加
-# git add generate_product_meta.py
+# generate_product_meta.py（VENDOR_READINGS/VENDOR_ALIASES追記）・generate_gallery_data.py を編集した場合のみ追加
+# git add generate_product_meta.py generate_gallery_data.py
 git commit -m "26MMDD_Nmonth_OCR"   # 例：260604_5gatu_OCR
 git push
 ```
@@ -230,6 +264,7 @@ git push
 
 | 症状 | 対処 |
 |---|---|
+| `did not find executable at 'C:\Python313\python.exe'` 等、venvが起動しない | venvの基底Python消失。`uv python install 3.13` でインストール後、`.venv/pyvenv.cfg` の `home`/`executable`/`command` をuvのPythonパス（例：`C:\Users\Sho Miyagi\AppData\Roaming\uv\python\cpython-3.13.x-windows-x86_64-none`）に書き換える。**パッケージ（torch等5.2GB）は`.venv`内に残っているので再インストール不要**。検証：`--version` が3.13.x、`torch.cuda.is_available()` がTrue（2026-07-06に実績あり） |
 | `torch.cuda.OutOfMemoryError` | `generate_ocr_data.py` は自動で `mag_ratio=1.5, canvas=2000` にフォールバック済み |
 | OCR が0%のまま | 初期化に5〜10分かかる。GPU使用率と `ocr_data.js` 保存時刻で確認 |
 | 進捗ログが出ない | stdout バッファリング。`ocr_data.js` のエントリ数で見る |
