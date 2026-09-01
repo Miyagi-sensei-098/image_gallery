@@ -16,6 +16,26 @@ OUTPUT_DIR = BASE_DIR / "gallery_data"
 # 数字プレフィックスで始まるフォルダのみ対象
 SECTION_PATTERN = re.compile(r"^(\d{2})_(.+)$")
 
+# 月次データフォルダ: "{YY}_{M}月{suffix}" (例: 25_08月データ -> 2025年8月データ)
+MONTHLY_PATTERN = re.compile(r"^\d{2}_(\d{1,2})月(.*)$")
+# カテゴリフォルダ: "{YY}_{NN}_{名前}" (例: 25_01_緑ラベル -> 緑ラベル)
+CATEGORY_PATTERN = re.compile(r"^\d{2}_(\d{2})_(.+)$")
+
+
+def get_section_label(name):
+    """フォルダ名から表示用ラベル（年を明示した人間向け文字列）を生成する。
+    例: '25_08月データ' -> '2025_08月データ'（月は2桁ゼロ埋め、年区切りは"_"）、'25_01_緑ラベル' -> '緑ラベル'
+    """
+    m = MONTHLY_PATTERN.match(name)
+    if m:
+        full_year = 2000 + int(name[:2])
+        month = int(m.group(1))
+        return f"{full_year}_{month:02d}月{m.group(2)}"
+    m = CATEGORY_PATTERN.match(name)
+    if m:
+        return m.group(2)
+    return re.sub(r"^\d+_", "", name)
+
 # 画像拡張子
 IMAGE_EXTENSIONS = {".webp", ".png", ".jpg", ".jpeg"}
 
@@ -150,7 +170,9 @@ def generate_section_data(section_dir, section_name):
 
 def load_existing_drive_ids():
     """既存の index.js から googleDriveFolderId を読み取り、
-    セクション名 -> ID の辞書で返す（再生成時に引き継ぐため）。"""
+    num（スキャン順の連番）-> ID の辞書で返す（再生成時に引き継ぐため）。
+    フォルダ名ではなく位置（num）をキーにするのは、命名規則変更でフォルダ名が
+    変わっても同じ位置の月には同じIDを引き継げるようにするため。"""
     index_file = OUTPUT_DIR / "index.js"
     if not index_file.exists():
         return {}
@@ -160,7 +182,7 @@ def load_existing_drive_ids():
         json_str = content[content.index("["):content.rindex("]") + 1]
         entries = json.loads(json_str)
         return {
-            e["name"]: e["googleDriveFolderId"]
+            e["num"]: e["googleDriveFolderId"]
             for e in entries if e.get("googleDriveFolderId")
         }
     except (ValueError, KeyError, json.JSONDecodeError) as e:
@@ -176,16 +198,12 @@ def main():
     if drive_ids:
         print(f"googleDriveFolderId 引き継ぎ: {len(drive_ids)}件")
 
-    # セクションフォルダを検出
+    # セクションフォルダを検出（ソート順=表示順。00_list_xlsx等の管理用フォルダは対象外）
     sections = []
     for item in sorted(BASE_DIR.iterdir()):
-        if item.is_dir():
-            match = SECTION_PATTERN.match(item.name)
-            if match:
-                num = match.group(1)
-                if num == "00":  # 00_list_xlsx, 00_logo 等の管理用フォルダは対象外
-                    continue
-                sections.append((num, item.name, item))
+        if item.is_dir() and not item.name.startswith("00_"):
+            if SECTION_PATTERN.match(item.name):
+                sections.append((item.name, item))
 
     if not sections:
         print("エラー: セクションフォル���が見つかりません。")
@@ -194,9 +212,12 @@ def main():
     print(f"検出されたセクション: {len(sections)}個")
 
     # セクション一覧 (index) を生成
+    # num はフォルダ名の先頭数字ではなく、スキャン順（＝表示順）の連番として採番する。
+    # これにより命名規則が変わっても num<=5 等の既存ロジック・googleDriveFolderId引き継ぎに影響しない。
     index_data = []
 
-    for num, name, path in sections:
+    for i, (name, path) in enumerate(sections, start=1):
+        num = f"{i:02d}"
         print(f"  スキャン中: {name} ...", end=" ")
         data = generate_section_data(path, name)
         print(f"{data['productCount']}商品, {data['imageCount']}枚")
@@ -211,13 +232,14 @@ def main():
         entry = {
             "num": num,
             "name": name,
+            "label": get_section_label(name),
             "file": f"gallery_data/section_{num}.js",
             "varName": js_var_name,
             "productCount": data["productCount"],
             "imageCount": data["imageCount"]
         }
-        if name in drive_ids:
-            entry["googleDriveFolderId"] = drive_ids[name]
+        if num in drive_ids:
+            entry["googleDriveFolderId"] = drive_ids[num]
         index_data.append(entry)
 
     # インデックスファイル出力

@@ -1,7 +1,8 @@
 var GALLERY_INDEX = [
   {
     "num": "01",
-    "name": "01_緑ラベル",
+    "name": "25_01_緑ラベル",
+    "label": "緑ラベル",
     "file": "gallery_data/section_01.js",
     "varName": "GALLERY_01",
     "productCount": 16,
@@ -9,7 +10,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "02",
-    "name": "02_毛ガニ",
+    "name": "25_02_毛ガニ",
+    "label": "毛ガニ",
     "file": "gallery_data/section_02.js",
     "varName": "GALLERY_02",
     "productCount": 13,
@@ -17,7 +19,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "03",
-    "name": "03_いくら",
+    "name": "25_03_いくら",
+    "label": "いくら",
     "file": "gallery_data/section_03.js",
     "varName": "GALLERY_03",
     "productCount": 13,
@@ -25,7 +28,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "04",
-    "name": "04_たらば",
+    "name": "25_04_たらば",
+    "label": "たらば",
     "file": "gallery_data/section_04.js",
     "varName": "GALLERY_04",
     "productCount": 15,
@@ -33,7 +37,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "05",
-    "name": "05_ホタテ",
+    "name": "25_05_ホタテ",
+    "label": "ホタテ",
     "file": "gallery_data/section_05.js",
     "varName": "GALLERY_05",
     "productCount": 14,
@@ -41,7 +46,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "06",
-    "name": "06_8月データ",
+    "name": "25_08月データ",
+    "label": "2025_08月データ",
     "file": "gallery_data/section_06.js",
     "varName": "GALLERY_06",
     "productCount": 59,
@@ -50,7 +56,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "07",
-    "name": "07_9月データ",
+    "name": "25_09月データ",
+    "label": "2025_09月データ",
     "file": "gallery_data/section_07.js",
     "varName": "GALLERY_07",
     "productCount": 46,
@@ -59,7 +66,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "08",
-    "name": "08_10月データ",
+    "name": "25_10月データ",
+    "label": "2025_10月データ",
     "file": "gallery_data/section_08.js",
     "varName": "GALLERY_08",
     "productCount": 63,
@@ -68,7 +76,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "09",
-    "name": "09_11月データ",
+    "name": "25_11月データ",
+    "label": "2025_11月データ",
     "file": "gallery_data/section_09.js",
     "varName": "GALLERY_09",
     "productCount": 94,
@@ -77,7 +86,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "10",
-    "name": "10_12月データ",
+    "name": "25_12月データ",
+    "label": "2025_12月データ",
     "file": "gallery_data/section_10.js",
     "varName": "GALLERY_10",
     "productCount": 100,
@@ -86,7 +96,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "11",
-    "name": "11_01月データ",
+    "name": "26_01月データ",
+    "label": "2026_01月データ",
     "file": "gallery_data/section_11.js",
     "varName": "GALLERY_11",
     "productCount": 94,
@@ -95,7 +106,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "12",
-    "name": "12_02月データ",
+    "name": "26_02月データ",
+    "label": "2026_02月データ",
     "file": "gallery_data/section_12.js",
     "varName": "GALLERY_12",
     "productCount": 101,
@@ -104,7 +116,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "13",
-    "name": "13_03月データ",
+    "name": "26_03月データ",
+    "label": "2026_03月データ",
     "file": "gallery_data/section_13.js",
     "varName": "GALLERY_13",
     "productCount": 115,
@@ -113,7 +126,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "14",
-    "name": "14_04月データ",
+    "name": "26_04月データ",
+    "label": "2026_04月データ",
     "file": "gallery_data/section_14.js",
     "varName": "GALLERY_14",
     "productCount": 62,
@@ -122,7 +136,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "15",
-    "name": "15_05月データ",
+    "name": "26_05月データ",
+    "label": "2026_05月データ",
     "file": "gallery_data/section_15.js",
     "varName": "GALLERY_15",
     "productCount": 76,
@@ -131,7 +146,8 @@ var GALLERY_INDEX = [
   },
   {
     "num": "16",
-    "name": "16_06月データ",
+    "name": "26_06月データ",
+    "label": "2026_06月データ",
     "file": "gallery_data/section_16.js",
     "varName": "GALLERY_16",
     "productCount": 65,
@@ -140,11 +156,22 @@ var GALLERY_INDEX = [
   },
   {
     "num": "17",
-    "name": "17_07月データ",
+    "name": "26_07月データ",
+    "label": "2026_07月データ",
     "file": "gallery_data/section_17.js",
     "varName": "GALLERY_17",
     "productCount": 75,
     "imageCount": 476,
     "googleDriveFolderId": "14hwZLmPJrVy9QDLvgDAmG8S_HShACYDb"
+  },
+  {
+    "num": "18",
+    "name": "26_08月データ",
+    "label": "2026_08月データ",
+    "file": "gallery_data/section_18.js",
+    "varName": "GALLERY_18",
+    "productCount": 62,
+    "imageCount": 383,
+    "googleDriveFolderId": "1Mgvb-oQM5L9OP0EWNvid6tB4sghSiZeh"
   }
 ];
