@@ -234,6 +234,8 @@ def find_id_cell(row):
         cs = c.strip()
         if not cs or is_url(cs):
             continue
+        if cs.upper().startswith("SKU-"):  # 2026年9月シートで追加されたSKU列（品番ではない）
+            continue
         if ID_TOKEN_RE.search(cs):
             return i
     return None
