@@ -183,5 +183,15 @@ var GALLERY_INDEX = [
     "productCount": 98,
     "imageCount": 580,
     "googleDriveFolderId": "17MrX5Cxyq66Cb6nzXJhbfIOLyRVLLVNP"
+  },
+  {
+    "num": "20",
+    "name": "26_10月データ",
+    "label": "2026_10月データ",
+    "file": "gallery_data/section_20.js",
+    "varName": "GALLERY_20",
+    "productCount": 57,
+    "imageCount": 366,
+    "googleDriveFolderId": "1FZKrtwqyoMXZT-uYScNQbIxDY4r3tW-A"
   }
 ];
